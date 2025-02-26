@@ -2,6 +2,8 @@
 
 #include "core/Vector.h"
 #include "core/String.h"
+#include "input/Input.h"
+#include "state/State.h"
 
 /**
  * @class Waldo
@@ -58,17 +60,7 @@ private:
 
     int lastInputId = 0;
 
-    struct Input {
-        enum Type {
-            Digital,
-            Analog
-        };
-
-        core::String label;
-        int pin;
-        int id;
-        Type type;
-    };
-
     core::Vector<Input> Inputs;
+
+    State state = State::None;
 };

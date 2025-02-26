@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ensure.h"
+#include "Slice.h"
 
 namespace core
 {
@@ -16,6 +17,16 @@ namespace core
         enum {
             kDefaultSize = 4
         };
+
+        typedef Slice<T> SliceT;
+
+        Vector();
+        /**
+         * @brief Construct a new Vector object from a slice of another vector
+         * 
+         * @param slice 
+         */
+        Vector(const SliceT& slice);
 
         /**
          * @brief add an element to the end of the vector
@@ -59,6 +70,22 @@ namespace core
          */
         void SetSize(int Size);
 
+        /**
+         * @brief Reset the vector to an empty vector
+         * @note Does not change memory allocation
+         */
+        void Reset();
+
+        /**
+         * @brief create a slice that references to a subsequence of the vector
+         * @note the slice does not have any ownership over the lifetime of the vector
+         * 
+         * @param Start Start index
+         * @param Length Number of elements
+         * @return Slice 
+         */
+        Slice<T> Slice(int Start, int Length);
+
     private:
         // actual data of data array
         int Size = 0;
@@ -69,6 +96,23 @@ namespace core
         // 
         T* Data = nullptr;
     };
+
+    template <typename T>
+    Vector<T>::Vector()
+    {
+
+    }
+
+    template <typename T>
+    Vector<T>::Vector(const Vector<T>::SliceT& slice) {
+        const int sliceLength = slice.end - slice.start;
+        SetSize(sliceLength);
+
+        for (int i=slice.start; i<slice.end; i++)
+        {
+            Add(slice[i]);
+        }
+    }
 
     template <typename T>
     void Vector<T>::Add(const T& element)
@@ -138,6 +182,10 @@ namespace core
 
     template <typename T>
     void Vector<T>::SetSize(int NewSize) {
+        if (Size == NewSize) {
+            return;
+        }
+
         if (Data) {
             free(Data);
             Data = nullptr;
@@ -149,6 +197,22 @@ namespace core
         const int numBytes = sizeof(T) * Size;
         Data = malloc(numBytes);        
         memset(Data, 0, numBytes);
+    }
+
+    template <typename T>
+    void Vector<T>::Reset()
+    {
+        Used = 0;
+    }
+
+    template <typename T>
+    Slice<T> Vector<T>::Slice(int Start, int Length)
+    {
+        return {
+            .Data = Data,
+            .Start = Start,
+            .Length = Length
+        };
     }
 
 } // namespace core

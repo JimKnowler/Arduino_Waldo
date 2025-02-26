@@ -19,6 +19,7 @@ namespace core
         String(const char* str);
         String& operator=(const char* str);
         String& operator+=(const char* str);
+        const char operator[](int Index) const;
 
         const char* c_str() const;
 
@@ -72,6 +73,11 @@ namespace core
         Data.Add(0);
 
         return *this;
+    }
+
+    inline const char String::operator[](int Index) const
+    {
+        return Data[Index];
     }
 
     inline const char* String::c_str() const

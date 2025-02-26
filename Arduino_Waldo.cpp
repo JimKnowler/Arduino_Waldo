@@ -45,7 +45,7 @@ void Waldo::add_input_analog(const char* label, int pin)
         .label = label,
         .pin = pin,
         .id = assignInputId(),
-        .type = Input::Type::Analog
+        .type = InputType::Analog
     };
 
     Inputs.Add(input);
@@ -59,7 +59,7 @@ void Waldo::add_input_digital(const char* label, int pin)
         .label = label,
         .pin = pin,
         .id = assignInputId(),
-        .type = Input::Type::Digital
+        .type = InputType::Digital
     };
 
     Inputs.Add(input);
@@ -89,3 +89,4 @@ int Waldo::assignInputId()
 
     return id;
 }
+
