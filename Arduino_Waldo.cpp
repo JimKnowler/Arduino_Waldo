@@ -12,6 +12,13 @@
   }
 */
 
+// TODO: add timeout, such that if host doesn't respond after 'n' seconds then the arduino client restarts and waits for a connection
+// TODO: perhaps we should have a special character that can be used to flush the serial port connection at any time.
+//       - the device can send this when it times out and effectively restart the serial communication.
+//       - perhaps it could be associated with a unique ID, that the host can acknowledge and reply with to confirm that the 
+//         connection has been successfully reset.
+
+
 Waldo::Waldo()
 {
 
