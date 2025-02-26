@@ -1,5 +1,8 @@
 #pragma once
 
+#include "core/Vector.h"
+#include "core/String.h"
+
 /**
  * @class Waldo
  * @brief Arduino client library for Waldo
@@ -49,4 +52,23 @@ public:
      *       flow control of the serial port.
      */
     void loop();
+
+private:
+    int assignInputId();
+
+    int lastInputId = 0;
+
+    struct Input {
+        enum Type {
+            Digital,
+            Analog
+        };
+
+        core::String label;
+        int pin;
+        int id;
+        Type type;
+    };
+
+    core::Vector<Input> Inputs;
 };
