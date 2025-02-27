@@ -26,9 +26,9 @@ public:
 
     FCommand& Reset();
 
-    FCommand& RegisterInput(const Input& input);
+    FCommand& RegisterInput(const FInput& input);
 
-    FCommand& InputValue(const Input& input, int value);
+    FCommand& InputValue(const FInput& input, const int value);
 
     FCommand& StartFrame();
 

@@ -4,9 +4,9 @@
 
 #include "InputType.h"
 
-struct Input {
+struct FInput {
     core::String label;
     int pin;
     int id;
-    InputType type;
+    EInputType type;
 };

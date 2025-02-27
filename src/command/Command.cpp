@@ -18,7 +18,7 @@ FCommand& FCommand::Reset()
     return *this;
 }
 
-FCommand& FCommand::RegisterInput(const Input& input)
+FCommand& FCommand::RegisterInput(const FInput& input)
 {
     Type = CommandType::RegisterInput;
 
@@ -36,7 +36,7 @@ FCommand& FCommand::RegisterInput(const Input& input)
     return *this;
 }
 
-FCommand& FCommand::InputValue(const Input& input, int value)
+FCommand& FCommand::InputValue(const FInput& input, const int value)
 {
     Type = CommandType::InputValue;
 
@@ -44,11 +44,31 @@ FCommand& FCommand::InputValue(const Input& input, int value)
     ensure(input.id < 256);
 
     ensure(value >= 0);
-    ensure(value < 256);
+
+    int mappedValue;
+
+    switch (input.type)
+    {
+        case EInputType::Analog:
+        {
+            // TODO: support multi-byte values
+            // TODO: support configuring active range of an analog input
+            ensure(value < 1024);
+            mappedValue = value / 4;
+            break;
+        }
+        case EInputType::Digital:
+        default:
+        {
+            ensure(value <= 1);
+            mappedValue = value;
+            break;
+        }
+    }
 
     Data.SetSize(2);
     Data.Add(input.id);
-    Data.Add(value);
+    Data.Add(mappedValue);
 
     return *this;
 }

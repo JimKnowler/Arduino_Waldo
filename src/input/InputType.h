@@ -1,6 +1,6 @@
 #pragma once
 
-enum class InputType {
+enum class EInputType {
     Digital = 0,
     Analog = 1
 };

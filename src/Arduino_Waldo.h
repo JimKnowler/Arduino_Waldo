@@ -1,15 +1,10 @@
 #pragma once
 
-#include "core/Vector.h"
-#include "core/String.h"
-#include "input/Input.h"
-#include "state/State.h"
-#include "command/CommandParser.h"
-#include "command/Command.h"
+#include "device/Device.h"
 
 /**
  * @class Waldo
- * @brief Arduino client library for Waldo
+ * @brief Arduino client device library for Waldo
  * 
  */
 class Waldo 
@@ -58,20 +53,5 @@ public:
     void loop();
 
 private:
-    int assignInputId();
-
-    void send(const FCommand& command);
-    void sendInputRegistrations();
-    void sendInputValues();
-
-    FCommandParser Parser;
-    FCommand Command;
-
-    int NumFramesInFlight = 0;
-
-    int LastInputId = 0;
-
-    core::Vector<Input> Inputs;
-
-    State CurrentState = State::None;
+    device::FDevice Device;
 };
