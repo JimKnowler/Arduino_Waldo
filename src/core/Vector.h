@@ -86,11 +86,13 @@ namespace core
 
         /**
          * @brief create a slice that references to a subsequence of the vector
-         * @note the slice does not have any ownership over the lifetime of the vector
+         * @note the slice does not have any ownership over the lifetime of the vector,
+         *       or its' underlying data.  The slice will become stale if you destroy 
+         *       or resize the vector.
          * 
          * @param Start Start index
          * @param Length Number of elements
-         * @return Slice 
+         * @return Slice that references part of this vector
          */
         Slice<T> Slice(int Start, int Length);
 
@@ -101,7 +103,7 @@ namespace core
         // number of elements stored in the data array
         int Used = 0;
 
-        // 
+        // data array
         T* Data = nullptr;
     };
 
@@ -116,7 +118,7 @@ namespace core
         const int sliceLength = slice.Length;
         const int sliceStart = slice.Start;
         const int sliceEnd = sliceStart + sliceLength;
-        
+
         SetSize(sliceLength);
 
         for (int i=sliceStart; i<sliceEnd; i++)
