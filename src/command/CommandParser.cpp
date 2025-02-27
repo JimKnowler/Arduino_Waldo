@@ -4,17 +4,17 @@
 
 #include <Arduino.h>
 
-CommandParser::CommandParser()
+FCommandParser::FCommandParser()
 {
     Buffer.SetSize(32);
 }
 
-void CommandParser::Reset()
+void FCommandParser::Reset()
 {
     Buffer.Reset();
 }
 
-bool CommandParser::Parse(Command& OutCommand)
+bool FCommandParser::Parse(FCommand& OutCommand)
 {
     const int available = Serial.available();
 
@@ -24,7 +24,7 @@ bool CommandParser::Parse(Command& OutCommand)
 
         Buffer.Add(byte);
 
-        if (ReadyToParse()) 
+        if (IsReadyToParseCommand())
         {
             ParseCommandAndConsumeBuffer(OutCommand);
 
@@ -35,7 +35,7 @@ bool CommandParser::Parse(Command& OutCommand)
     return false;
 }
 
-bool CommandParser::IsReadyToParseCommand() const
+bool FCommandParser::IsReadyToParseCommand() const
 {
     const int BufferSize = Buffer.Num();
 
@@ -45,23 +45,26 @@ bool CommandParser::IsReadyToParseCommand() const
 
     const int CommandPayloadSize = Buffer[1];
     const int CommandSize = 2 + CommandPayloadSize;
-    if (Buffer < CommandSize) 
+    if (BufferSize < CommandSize) 
     {
         return false;
     }
     
-    return (Buffer == CommandSize);
+    ensure(BufferSize == CommandSize);
+
+    return true;
 }
 
-void CommandParser::ParseCommandAndConsumeBuffer(Command& OutCommand)
+void FCommandParser::ParseCommandAndConsumeBuffer(FCommand& OutCommand)
 {
     const int Type = Buffer[0];
-    const int CommandSize = Buffer[1];
-    OutCommand = {
-        .Type = static_cast<CommandType>(Type),
-        .Data = Buffer.Slice(2, CommandSize);
-    };
+    const int CommandPayloadSize = Buffer[1];
 
-    ensure(Buffer.Length() == (2 + CommandSize));
+    const int CommandSize = 2 + CommandPayloadSize;
+    ensure(Buffer.Num() == CommandSize);
+
+    OutCommand.Type = static_cast<CommandType>(Type);
+    OutCommand.Data = Buffer.Slice(2, CommandPayloadSize);
+
     Buffer.Reset();
 }

@@ -3,25 +3,25 @@
 #include "Command.h"
 
 /**
- * @class CommandParser
+ * @class FCommandParser
  * @brief Parse input from serial connection to generate commands
  * 
  */
-class CommandParser
+class FCommandParser
 {
 public:
-    CommandParser();
+    FCommandParser();
 
     void Reset();
 
-    bool Parse(Command& OutCommand);
+    bool Parse(FCommand& OutCommand);
 
 private:
     // is there enough data in the buffer to parse the next command
     bool IsReadyToParseCommand() const;
 
     // parse buffer into OutCommand and empty the buffer
-    void ParseCommandAndConsumeBuffer(Command& OutCommand);
+    void ParseCommandAndConsumeBuffer(FCommand& OutCommand);
 
     core::Vector<uint8_t> Buffer;
 };

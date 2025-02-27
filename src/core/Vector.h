@@ -36,6 +36,14 @@ namespace core
         void Add(const T& element);
 
         /**
+         * @brief add multiple elements to the end of the vector
+         * 
+         * @param elements the array of elements to add
+         * @param num the number of elements to add
+         */
+        void Add(const T* elements, int num);
+
+        /**
          * @brief get the number of elements in the vector
          * 
          * @return the number of elements in the vector
@@ -105,10 +113,13 @@ namespace core
 
     template <typename T>
     Vector<T>::Vector(const Vector<T>::SliceT& slice) {
-        const int sliceLength = slice.end - slice.start;
+        const int sliceLength = slice.Length;
+        const int sliceStart = slice.Start;
+        const int sliceEnd = sliceStart + sliceLength;
+        
         SetSize(sliceLength);
 
-        for (int i=slice.start; i<slice.end; i++)
+        for (int i=sliceStart; i<sliceEnd; i++)
         {
             Add(slice[i]);
         }
@@ -134,6 +145,23 @@ namespace core
 
         Data[Used] = element;
         Used += 1;
+    }
+
+    template <typename T>
+    void Vector<T>::Add(const T* elements, int num)
+    {
+        const int required = Used + num;
+        int newSize = Size;
+
+        while (newSize < required) {
+            newSize *= 2;
+        }
+
+        SetSize(newSize);
+
+        memcpy(Data + Used, elements, sizeof(T) * num);
+        
+        Used += num;
     }
 
     template <typename T>

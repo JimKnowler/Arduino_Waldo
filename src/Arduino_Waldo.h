@@ -4,6 +4,8 @@
 #include "core/String.h"
 #include "input/Input.h"
 #include "state/State.h"
+#include "command/CommandParser.h"
+#include "command/Command.h"
 
 /**
  * @class Waldo
@@ -58,9 +60,18 @@ public:
 private:
     int assignInputId();
 
-    int lastInputId = 0;
+    void send(const FCommand& command);
+    void sendInputRegistrations();
+    void sendInputValues();
+
+    FCommandParser Parser;
+    FCommand Command;
+
+    int NumFramesInFlight = 0;
+
+    int LastInputId = 0;
 
     core::Vector<Input> Inputs;
 
-    State state = State::None;
+    State CurrentState = State::None;
 };
