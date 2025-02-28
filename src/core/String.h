@@ -32,7 +32,7 @@ namespace core
     inline String::String()
     {
         Data.SetSize(1);
-        Data[0] = 0;
+        Data.Add(0);
     }
 
     inline String::String(const char* str)

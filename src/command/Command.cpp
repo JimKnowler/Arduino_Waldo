@@ -96,6 +96,8 @@ FCommand& FCommand::Message(const core::String& message)
     const int Length = message.Length();
     Data.SetSize(Length);
     Data.Add(message.c_str(), Length);
+
+    return *this;
 }
 
 FCommand& FCommand::AcknowledgeReset()

@@ -4,6 +4,9 @@
 
 #include <Arduino.h>
 
+// TODO: ignore random data in serial comms, until a command is available
+//       header/footer for each command?
+
 FCommandParser::FCommandParser()
 {
     Buffer.SetSize(32);

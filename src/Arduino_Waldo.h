@@ -51,6 +51,12 @@ public:
      *       flow control of the serial port.
      */
     void loop();
+    
+    /**
+     * @brief run a series of tests
+     * 
+     */
+    void test();
 
 private:
     device::FDevice Device;

@@ -2,6 +2,7 @@
 
 #include "Ensure.h"
 #include "Slice.h"
+#include "Math.h"
 
 namespace core
 {
@@ -21,12 +22,28 @@ namespace core
         typedef Slice<T> SliceT;
 
         Vector();
+        ~Vector();
+
         /**
          * @brief Construct a new Vector object from a slice of another vector
          * 
          * @param slice 
          */
         Vector(const SliceT& slice);
+
+        /**
+         * @brief Assignment operator
+         * 
+         * @param other the vector to copy
+         */
+        void operator=(const Vector<T>& other);
+
+        /**
+         * @brief Copy constructor
+         * 
+         * @param other the vector to copy
+         */
+        Vector(const Vector<T>& other);
 
         /**
          * @brief add an element to the end of the vector
@@ -114,6 +131,16 @@ namespace core
     }
 
     template <typename T>
+    Vector<T>::~Vector()
+    {
+        if (Data)
+        {
+            free(Data);
+            Data = nullptr;
+        }
+    }
+
+    template <typename T>
     Vector<T>::Vector(const Vector<T>::SliceT& slice) {
         const int sliceLength = slice.Length;
         const int sliceStart = slice.Start;
@@ -128,6 +155,25 @@ namespace core
     }
 
     template <typename T>
+    Vector<T>::Vector(const Vector<T>& other) {
+        *this = other;
+    }
+
+    template <typename T>
+    void Vector<T>::operator=(const Vector<T>& other) {
+        Size = other.Size;
+        Used = other.Used;
+        
+        if (Data) {
+            free(Data);
+            Data = nullptr;
+        }
+
+        Data = malloc(sizeof(T) * Size);
+        memcpy(Data, other.Data, sizeof(T) * Used);
+    }
+
+    template <typename T>
     void Vector<T>::Add(const T& element)
     {
         if (Data == nullptr) {
@@ -135,13 +181,13 @@ namespace core
         } else if (Used == Size) {
             const T* oldData = Data;
             Data = nullptr;
+
+            const int OldUsed = Used;
             
             SetSize(Size * 2);
             
-            for (int i=0; i<Used; i++) {
-                Data[i] = oldData[i];
-            }
-
+            Used = OldUsed;
+            memcpy(Data, oldData, sizeof(T) * Used);
             free(oldData);
         }
 
@@ -153,16 +199,24 @@ namespace core
     void Vector<T>::Add(const T* elements, int num)
     {
         const int required = Used + num;
-        int newSize = Size;
-
+        int newSize = Max(Size, static_cast<int>(kDefaultSize));
+        
         while (newSize < required) {
             newSize *= 2;
         }
 
-        SetSize(newSize);
+        const T* oldData = Data;
+        Data = nullptr;
 
-        memcpy(Data + Used, elements, sizeof(T) * num);
+        const int OldUsed = Used;
         
+        SetSize(newSize);
+        
+        Used = OldUsed;
+        memcpy(Data, oldData, sizeof(T) * Used);
+        free(oldData);
+
+        memcpy(Data + Used, elements, sizeof(T) * num);        
         Used += num;
     }
 

@@ -8,7 +8,7 @@ namespace device
 
     void FDevice::Setup()
     {
-        Serial.begin(2000000);
+        Serial.begin(500000);
 
         Send(FCommand().Message("Arduino Waldo Setup"));
     

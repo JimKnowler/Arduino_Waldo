@@ -1,0 +1,111 @@
+#include "TestVector.h"
+
+#include "core/Vector.h"
+
+namespace test
+{
+    void FTestVector::Run()
+    {
+        ShouldConstruct();
+        ShouldAddValue();
+        ShouldAddValues();
+        ShouldCopyConstruct();
+        ShouldAssign();
+    }
+
+    void FTestVector::ShouldConstruct()
+    {
+        core::Vector<uint8_t> vector;
+        ensure(vector.Num() == 0);
+    }
+
+    void FTestVector::ShouldAddValue()
+    {
+        core::Vector<uint8_t> vector;
+        
+        vector.Add(11);
+        ensure(vector.Num() == 1);
+        ensure(vector[0] == 11);
+
+        vector.Add(22);
+        ensure(vector.Num() == 2);
+        ensure(vector[0] == 11);
+        ensure(vector[1] == 22);
+
+        vector.Add(33);
+        vector.Add(44);
+        ensure(vector.Num() == 4);
+        ensure(vector[0] == 11);
+        ensure(vector[1] == 22);
+        ensure(vector[2] == 33);
+        ensure(vector[3] == 44);
+
+        vector.Add(55);
+        ensure(vector.Num() == 5);
+        ensure(vector[0] == 11);
+        ensure(vector[1] == 22);
+        ensure(vector[2] == 33);
+        ensure(vector[3] == 44);
+        ensure(vector[4] == 55);
+    }
+
+    void FTestVector::ShouldAddValues()
+    {
+        core::Vector<uint8_t> vector;
+        
+        vector.Add(11);
+        vector.Add(22);
+        vector.Add(33);
+        vector.Add(44);
+        vector.Add(55);
+
+        const uint8_t kValues[] = {1,2,3,4,5,6,7,8};
+        vector.Add(kValues, 8);
+        ensure(vector.Num() == 13);
+        ensure(vector[0] == 11);
+        ensure(vector[1] == 22);
+        ensure(vector[2] == 33);
+        ensure(vector[3] == 44);
+        ensure(vector[4] == 55);
+        ensure(vector[5] == 1);
+        ensure(vector[6] == 2);
+        ensure(vector[7] == 3);
+        ensure(vector[8] == 4);
+        ensure(vector[9] == 5);
+        ensure(vector[10] == 6);
+        ensure(vector[11] == 7);
+        ensure(vector[12] == 8);
+    }
+
+    void FTestVector::ShouldCopyConstruct()
+    {
+        core::Vector<uint8_t> vector;
+        const uint8_t kValues[] = {8,7,6,5,4,3};
+        vector.Add(kValues, 6);
+
+        core::Vector<uint8_t> vector2(vector);
+        ensureEq(vector2.Num(), 6);
+        ensureEq(vector2[0], 8);
+        ensureEq(vector2[1], 7);
+        ensureEq(vector2[2], 6);
+        ensureEq(vector2[3], 5);
+        ensureEq(vector2[4], 4);
+        ensureEq(vector2[5], 3);
+    }
+
+    void FTestVector::ShouldAssign()
+    {
+        core::Vector<uint8_t> vector;
+        const uint8_t kValues[] = {8,7,6,5,4};
+        vector.Add(kValues, 5);
+
+        core::Vector<uint8_t> vector2;
+        vector2 = vector;
+        ensureEq(vector2.Num(), 5);
+        ensureEq(vector2[0], 8);
+        ensureEq(vector2[1], 7);
+        ensureEq(vector2[2], 6);
+        ensureEq(vector2[3], 5);
+        ensureEq(vector2[4], 4);
+    }
+}
