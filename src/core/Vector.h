@@ -9,6 +9,8 @@ namespace core
     /**
      * @class Vector
      * @brief Lightweight implementation of <vector> for Arduino_Waldo project
+     * @note Suitable for POD (Plain Old Data) elements 
+     *       (i.e. does not call constructor/destuctor on elements)
      */
 
     template <typename T>
@@ -90,14 +92,16 @@ namespace core
 
         /**
          * @brief Forcibly set the size of the vector to a new size, and erase all previous data 
-         * 
-         * @param Size
+         * @note Underlying array of data is not initialized to valid or null values
+         * @note No guarantee that the array will be reallocated
+         * @param NewSize The new size of the underlying data
          */
-        void SetSize(int Size);
+        void SetSize(int NewSize);
 
         /**
          * @brief Reset the vector to an empty vector
          * @note Does not change memory allocation
+         * @note Does not call destructor on elements
          */
         void Reset();
 
@@ -114,8 +118,8 @@ namespace core
         Slice<T> Slice(int Start, int Length);
 
     private:
-        // actual data of data array
-        int Size = 0;
+        // actual size of data array
+        int DataSize = 0;
         
         // number of elements stored in the data array
         int Used = 0;
@@ -161,7 +165,7 @@ namespace core
 
     template <typename T>
     void Vector<T>::operator=(const Vector<T>& other) {
-        Size = other.Size;
+        DataSize = other.DataSize;
         Used = other.Used;
         
         if (Data) {
@@ -169,7 +173,7 @@ namespace core
             Data = nullptr;
         }
 
-        Data = malloc(sizeof(T) * Size);
+        Data = malloc(sizeof(T) * DataSize);
         memcpy(Data, other.Data, sizeof(T) * Used);
     }
 
@@ -178,13 +182,13 @@ namespace core
     {
         if (Data == nullptr) {
             SetSize(kDefaultSize);
-        } else if (Used == Size) {
+        } else if (Used == DataSize) {
             const T* oldData = Data;
             Data = nullptr;
 
             const int OldUsed = Used;
             
-            SetSize(Size * 2);
+            SetSize(DataSize * 2);
             
             Used = OldUsed;
             memcpy(Data, oldData, sizeof(T) * Used);
@@ -199,22 +203,25 @@ namespace core
     void Vector<T>::Add(const T* elements, int num)
     {
         const int required = Used + num;
-        int newSize = Max(Size, static_cast<int>(kDefaultSize));
         
-        while (newSize < required) {
-            newSize *= 2;
+        if (required > DataSize)
+        {
+            int newSize = Max(DataSize, static_cast<int>(kDefaultSize));
+            while (newSize < required) {
+                newSize *= 2;
+            }
+
+            const T* oldData = Data;
+            Data = nullptr;
+
+            const int OldUsed = Used;
+            
+            SetSize(newSize);
+            
+            Used = OldUsed;
+            memcpy(Data, oldData, sizeof(T) * Used);
+            free(oldData);
         }
-
-        const T* oldData = Data;
-        Data = nullptr;
-
-        const int OldUsed = Used;
-        
-        SetSize(newSize);
-        
-        Used = OldUsed;
-        memcpy(Data, oldData, sizeof(T) * Used);
-        free(oldData);
 
         memcpy(Data + Used, elements, sizeof(T) * num);        
         Used += num;
@@ -266,7 +273,7 @@ namespace core
 
     template <typename T>
     void Vector<T>::SetSize(int NewSize) {
-        if (Size == NewSize) {
+        if (DataSize == NewSize) {
             return;
         }
 
@@ -275,12 +282,11 @@ namespace core
             Data = nullptr;
         }
 
-        Size = NewSize;
+        DataSize = NewSize;
         Used = 0;
 
-        const int numBytes = sizeof(T) * Size;
-        Data = malloc(numBytes);        
-        memset(Data, 0, numBytes);
+        const int numBytes = sizeof(T) * DataSize;
+        Data = malloc(numBytes);
     }
 
     template <typename T>
@@ -292,6 +298,9 @@ namespace core
     template <typename T>
     Slice<T> Vector<T>::Slice(int Start, int Length)
     {
+        ensure(Start >= 0);
+        ensure((Start + Length) <= Used);
+
         return {
             .Data = Data,
             .Start = Start,

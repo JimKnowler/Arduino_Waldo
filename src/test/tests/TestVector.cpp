@@ -1,6 +1,7 @@
 #include "TestVector.h"
 
 #include "core/Vector.h"
+#include "core/String.h"
 
 namespace test
 {
@@ -11,12 +12,15 @@ namespace test
         ShouldAddValues();
         ShouldCopyConstruct();
         ShouldAssign();
+        ShouldSetSize();
+        ShouldSetSizeThenAddElements();
     }
 
     void FTestVector::ShouldConstruct()
     {
         core::Vector<uint8_t> vector;
         ensure(vector.Num() == 0);
+        ensure(vector.GetData() == nullptr);
     }
 
     void FTestVector::ShouldAddValue()
@@ -107,5 +111,23 @@ namespace test
         ensureEq(vector2[2], 6);
         ensureEq(vector2[3], 5);
         ensureEq(vector2[4], 4);
+    }
+
+    void FTestVector::ShouldSetSize()
+    {
+        core::Vector<char> vector;
+        vector.SetSize(32);
+        ensureEq(vector.Num(), 0);
+        ensure(vector.GetData() != nullptr);
+    }
+
+    void FTestVector::ShouldSetSizeThenAddElements()
+    {
+        const core::String message("my test message");
+        const int Length = message.Length();
+        
+        core::Vector<char> vector;
+        vector.SetSize(Length);
+        vector.Add(message.c_str(), Length);
     }
 }

@@ -13,5 +13,7 @@ namespace test
         void ShouldAddValues();
         void ShouldCopyConstruct();
         void ShouldAssign();
+        void ShouldSetSize();
+        void ShouldSetSizeThenAddElements();
     };
 }
