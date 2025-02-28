@@ -6,11 +6,16 @@ namespace device
 {
     static const int kMaxNumFramesInFlight = 3;
 
+    FDevice::FDevice() : Encoder(Command)
+    {
+        
+    }
+
     void FDevice::Setup()
     {
         Serial.begin(500000);
 
-        Send(FCommand().Message("Arduino Waldo Setup"));
+        ByteStream.Send(Encoder.Message("Arduino Waldo Setup"));
     
         CurrentState = State::Reset;
     }
@@ -27,16 +32,16 @@ namespace device
         switch (CurrentState)
         {
             case State::Reset:
-                Send(Command.Reset());
+                ByteStream.Send(Encoder.Reset());
                 CurrentState = State::WaitAcknowledgeReset;
                 break;
             case State::WaitAcknowledgeReset:            
-                if (!Parser.Parse(Command)) {
+                if (!ByteStream.Receive(Command)) {
                     // not enough data from host to parse a command
                     break;
                 }
                 
-                if (Command.GetType() != CommandType::AcknowledgeReset) {
+                if (Command.GetType() != command::ECommandType::AcknowledgeReset) {
                     // ignore unexpected command from host
                     break;
                 }
@@ -48,11 +53,11 @@ namespace device
                 CurrentState = State::SendFrame;
                 break;
             case State::SendFrame:
-                Send(Command.StartFrame());
+                ByteStream.Send(Encoder.StartFrame());
 
                 SendInputValues();
 
-                Send(Command.EndFrame());
+                ByteStream.Send(Encoder.EndFrame());
 
                 NumFramesInFlight += 1;
                 
@@ -61,12 +66,12 @@ namespace device
                 }
                 break;
             case State::WaitAcknowledgeFrame:
-                if (!Parser.Parse(Command)) {
-                    // not enough data from host to parse a command
+                if (!ByteStream.Receive(Command)) {
+                    // not enough data from host to receive a command
                     break;
                 }
 
-                if (Command.GetType() != CommandType::AcknowledgeFrame) {
+                if (Command.GetType() != command::ECommandType::AcknowledgeFrame) {
                     // ignore unexpected command from host
                     break;
                 }
@@ -92,24 +97,6 @@ namespace device
         return id;
     }
 
-    void FDevice::Send(const FCommand& command)
-    {
-        const core::Vector<uint8_t>& Data = command.GetData();
-        const int numBytes = Data.Num();
-        ensure(numBytes < 256);
-
-        const uint8_t type = static_cast<uint8_t>(command.GetType());
-
-        // 1 byte - type
-        Serial.write(type);
-
-        // 1 byte - payload size
-        Serial.write(numBytes);
-
-        // n bytes - payload
-        Serial.write(Data.GetData(), numBytes);
-    }
-
     void FDevice::SendInputRegistrations()
     {
         const int NumInputs = Inputs.Num();
@@ -117,7 +104,7 @@ namespace device
         for (int i=0; i<NumInputs; i++)
         {
             const FInput& input = Inputs[i];
-            Send(FCommand().RegisterInput(input));
+            ByteStream.Send(Encoder.RegisterInput(input));
         }
     }
 
@@ -142,7 +129,7 @@ namespace device
                     break;
             }
 
-            Send(FCommand().InputValue(input, value));
+            ByteStream.Send(Encoder.InputValue(input, value));
         }
     }
 

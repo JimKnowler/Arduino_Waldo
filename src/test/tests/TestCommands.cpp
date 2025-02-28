@@ -1,11 +1,15 @@
 #include "TestCommands.h"
 
-#include "command/CommandParser.h"
+#include "command/CommandEncoder.h"
 #include "core/Ensure.h"
 #include "input/Input.h"
 
 namespace test 
 {
+    using command::FCommandEncoder;
+    using command::FCommand;
+    using command::ECommandType;
+
     void FTestCommands::Run()
     {
         ShouldImplementCommandReset();
@@ -18,8 +22,9 @@ namespace test
 
     void FTestCommands::ShouldImplementCommandReset()
     {
-        const FCommand reset = FCommand().Reset();
-        ensure(reset.GetType() == CommandType::Reset);
+        FCommand reset;
+        FCommandEncoder(reset).Reset();
+        ensure(reset.GetType() == ECommandType::Reset);
         ensure(reset.GetData().Num() == 0);
     }
 
@@ -32,8 +37,9 @@ namespace test
             .type = EInputType::Digital
         };
 
-        const FCommand registerInputDigital = FCommand().RegisterInput(inputDigital);
-        ensure(registerInputDigital.GetType() == CommandType::RegisterInput);
+        FCommand registerInputDigital;
+        FCommandEncoder(registerInputDigital).RegisterInput(inputDigital);
+        ensure(registerInputDigital.GetType() == ECommandType::RegisterInput);
         ensure(registerInputDigital.GetData().Num() == 19);
         // TODO: test inputs to command match the output of command parser
 
@@ -44,8 +50,9 @@ namespace test
             .type = EInputType::Analog
         };
 
-        const FCommand registerInputAnalog = FCommand().RegisterInput(inputAnalog);
-        ensure(registerInputAnalog.GetType() == CommandType::RegisterInput);
+        FCommand registerInputAnalog;
+        FCommandEncoder(registerInputAnalog).RegisterInput(inputAnalog);
+        ensure(registerInputAnalog.GetType() == ECommandType::RegisterInput);
         ensure(registerInputAnalog.GetData().Num() == 18);
         // TODO: test inputs to command match the output of command parser
     }
@@ -59,8 +66,9 @@ namespace test
             .type = EInputType::Digital
         };
 
-        const FCommand inputValueDigital = FCommand().InputValue(inputDigital, 1);
-        ensure(inputValueDigital.GetType() == CommandType::InputValue);
+        FCommand inputValueDigital;
+        FCommandEncoder(inputValueDigital).InputValue(inputDigital, 1);
+        ensure(inputValueDigital.GetType() == ECommandType::InputValue);
         ensure(inputValueDigital.GetData().Num() == 2);
         // TODO: test inputs to command match the output of command parser
 
@@ -71,31 +79,35 @@ namespace test
             .type = EInputType::Analog
         };
 
-        const FCommand inputValueAnalog = FCommand().InputValue(inputAnalog, 1023);
-        ensure(inputValueAnalog.GetType() == CommandType::InputValue);
+        FCommand inputValueAnalog;
+        FCommandEncoder(inputValueAnalog).InputValue(inputAnalog, 1023);
+        ensure(inputValueAnalog.GetType() == ECommandType::InputValue);
         ensure(inputValueAnalog.GetData().Num() == 2);
         // TODO: test inputs to command match the output of command parser
     }
 
     void FTestCommands::ShouldImplementCommandStartFrame()
     {
-        const FCommand startFrame = FCommand().StartFrame();
-        ensureCharEq(startFrame.GetType(), CommandType::StartFrame);
+        FCommand startFrame;
+        FCommandEncoder(startFrame).StartFrame();
+        ensureCharEq(startFrame.GetType(), ECommandType::StartFrame);
         ensureEq(startFrame.GetData().Num(), 0);
     }
 
     void FTestCommands::ShouldImplementCommandEndFrame()
     {
-        const FCommand endFrame = FCommand().EndFrame();
-        ensureCharEq(endFrame.GetType(), CommandType::EndFrame);
+        FCommand endFrame;
+        FCommandEncoder(endFrame).EndFrame();
+        ensureCharEq(endFrame.GetType(), ECommandType::EndFrame);
         ensureEq(endFrame.GetData().Num(), 0);
     }
 
     void FTestCommands::ShouldImplementCommandMessage()
     {
         const core::String strMessage("My Test Message");
-        const FCommand message = FCommand().Message(strMessage);
-        ensureCharEq(message.GetType(), CommandType::Message);
+        FCommand message;
+        FCommandEncoder(message).Message(strMessage);
+        ensureCharEq(message.GetType(), ECommandType::Message);
         ensureEq(message.GetData().Num(), strMessage.Length());
         // TODO: test inputs to command match the output of command parser
     }

@@ -10,45 +10,27 @@
 
 #include <stdint.h>
 
-/**
- * @struct FCommand
- * @brief Encapsulate a command and its' arguments
- */
-class FCommand
+namespace command
 {
-public:
-    CommandType GetType() const;
+    /**
+     * @struct FCommand
+     * @brief Encapsulate a command and its' arguments
+     */
+    class FCommand
+    {
+    public:
+        ECommandType GetType() const;
 
-    const core::Vector<uint8_t>& GetData() const;
+        const core::Vector<uint8_t>& GetData() const;
 
-    ///////////////////////////////////////////////////
-    // Device
+    private:
+        friend class FCommandByteStream;
+        friend class FCommandEncoder;
+        
+        ECommandType Type;
 
-    FCommand& Reset();
-
-    FCommand& RegisterInput(const FInput& input);
-
-    FCommand& InputValue(const FInput& input, const int value);
-
-    FCommand& StartFrame();
-
-    FCommand& EndFrame();
-
-    FCommand& Message(const core::String& message);
-
-    ///////////////////////////////////////////////////
-    // Host
-
-    FCommand& AcknowledgeReset();
-
-    FCommand& AcknowledgeFrame();
-
-private:
-    friend class FCommandParser;
-    
-    CommandType Type;
-
-    core::Vector<uint8_t> Data;
-};
+        core::Vector<uint8_t> Data;
+    };
+}
 
 #endif

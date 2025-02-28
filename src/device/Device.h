@@ -4,7 +4,8 @@
 #include "core/String.h"
 #include "input/Input.h"
 #include "state/State.h"
-#include "command/CommandParser.h"
+#include "command/CommandByteStream.h"
+#include "command/CommandEncoder.h"
 #include "command/Command.h"
 
 namespace device
@@ -12,6 +13,8 @@ namespace device
     class FDevice
     {
     public:
+        FDevice();
+
         void Setup();
 
         void AddInput(const FInput& input);
@@ -21,13 +24,12 @@ namespace device
         int AssignInputId();
 
     private:
-
-        void Send(const FCommand& command);
         void SendInputRegistrations();
         void SendInputValues();
 
-        FCommandParser Parser;
-        FCommand Command;
+        command::FCommandByteStream ByteStream;
+        command::FCommandEncoder Encoder;
+        command::FCommand Command;
 
         int NumFramesInFlight = 0;
 

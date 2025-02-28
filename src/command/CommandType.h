@@ -1,16 +1,19 @@
 #pragma once
 
-enum class CommandType
+namespace command
 {
-    // Device
-    Reset = 'R',
-    RegisterInput = 'I',
-    StartFrame = 'F',
-    InputValue = 'V',
-    EndFrame = 'E',
-    Message = 'M',
-    
-    // Host
-    AcknowledgeReset = 'A',
-    AcknowledgeFrame = 'K'
-};
+    enum class ECommandType
+    {
+        // Device
+        Reset = 'R',
+        RegisterInput = 'I',
+        StartFrame = 'F',
+        InputValue = 'V',
+        EndFrame = 'E',
+        Message = 'M',
+        
+        // Host
+        AcknowledgeReset = 'A',
+        AcknowledgeFrame = 'K'
+    };
+}
