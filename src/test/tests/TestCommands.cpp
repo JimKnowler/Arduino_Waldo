@@ -35,7 +35,7 @@ namespace test
         const FCommand registerInputDigital = FCommand().RegisterInput(inputDigital);
         ensure(registerInputDigital.GetType() == CommandType::RegisterInput);
         ensure(registerInputDigital.GetData().Num() == 19);
-        // TODO: parse the internals
+        // TODO: test inputs to command match the output of command parser
 
         const FInput inputAnalog = FInput{
             .label = "my analog input",
@@ -47,7 +47,7 @@ namespace test
         const FCommand registerInputAnalog = FCommand().RegisterInput(inputAnalog);
         ensure(registerInputAnalog.GetType() == CommandType::RegisterInput);
         ensure(registerInputAnalog.GetData().Num() == 18);
-        // TODO: parse the internals
+        // TODO: test inputs to command match the output of command parser
     }
 
     void FTestCommands::ShouldImplementCommandInputValue()
@@ -62,7 +62,7 @@ namespace test
         const FCommand inputValueDigital = FCommand().InputValue(inputDigital, 1);
         ensure(inputValueDigital.GetType() == CommandType::InputValue);
         ensure(inputValueDigital.GetData().Num() == 2);
-        // TODO: parse the internals
+        // TODO: test inputs to command match the output of command parser
 
         const FInput inputAnalog = FInput{
             .label = "my analog input",
@@ -74,33 +74,29 @@ namespace test
         const FCommand inputValueAnalog = FCommand().InputValue(inputAnalog, 1023);
         ensure(inputValueAnalog.GetType() == CommandType::InputValue);
         ensure(inputValueAnalog.GetData().Num() == 2);
-        // TODO: parse the internals
+        // TODO: test inputs to command match the output of command parser
     }
 
     void FTestCommands::ShouldImplementCommandStartFrame()
     {
-
+        const FCommand startFrame = FCommand().StartFrame();
+        ensureCharEq(startFrame.GetType(), CommandType::StartFrame);
+        ensureEq(startFrame.GetData().Num(), 0);
     }
 
     void FTestCommands::ShouldImplementCommandEndFrame()
     {
-
+        const FCommand endFrame = FCommand().EndFrame();
+        ensureCharEq(endFrame.GetType(), CommandType::EndFrame);
+        ensureEq(endFrame.GetData().Num(), 0);
     }
 
     void FTestCommands::ShouldImplementCommandMessage()
     {
-        Serial.println("a");
-        const core::String message("My Test Message");
-        Serial.println("b");
-        {
-            // NOTE: issue with Message command - test runner is crashing when this function exits
-            //FCommand().Message(message);
-        }
-        Serial.println("c");
-        /*
-        const FCommand message = FCommand().Message("My Test Message");
+        const core::String strMessage("My Test Message");
+        const FCommand message = FCommand().Message(strMessage);
         ensureCharEq(message.GetType(), CommandType::Message);
-        ensureEq(message.GetData().Num(), message.Length());
-        */
+        ensureEq(message.GetData().Num(), strMessage.Length());
+        // TODO: test inputs to command match the output of command parser
     }
 }
