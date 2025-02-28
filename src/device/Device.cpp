@@ -1,7 +1,5 @@
 #include "Device.h"
 
-#include <Arduino.h>
-
 namespace device 
 {
     static const int kMaxNumFramesInFlight = 3;
@@ -13,7 +11,7 @@ namespace device
 
     void FDevice::Setup()
     {
-        Serial.begin(500000);
+        ByteStream.Setup();
 
         ByteStream.Send(Encoder.Message("Arduino Waldo Setup"));
     

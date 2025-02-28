@@ -14,6 +14,8 @@ namespace command
     public:
         FCommandByteStream();
 
+        void Setup();
+
         void Reset();
 
         bool Receive(FCommand& OutCommand);

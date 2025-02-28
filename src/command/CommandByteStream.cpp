@@ -14,6 +14,13 @@ namespace command
         Buffer.SetSize(32);
     }
 
+    void FCommandByteStream::Setup()
+    {
+        // TODO: is there any value in adding delay() here to prevent noise on serial connection?
+
+        Serial.begin(500000);        
+    }
+
     void FCommandByteStream::Reset()
     {
         Buffer.Reset();
