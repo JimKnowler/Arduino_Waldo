@@ -1,4 +1,6 @@
-#include "Ensure.h"
+#include "core/Ensure.h"
+
+#include "core/String.h"
 
 namespace core
 {
@@ -30,7 +32,6 @@ namespace core
         
         Serial.print("ensureEq failed: actual[");
         Serial.print(labelActual);
-        Serial.print(" ");
         Serial.print("] != expected[");
         Serial.print(labelExpected);
         Serial.println("]");
@@ -59,19 +60,47 @@ namespace core
         
         Serial.print("ensureCharEq failed: actual[");
         Serial.print(labelActual);
-        Serial.print(" ");
         Serial.print("] != expected[");
         Serial.print(labelExpected);
         Serial.println("]");
 
-        Serial.print("--> ");
+        Serial.print("--> [");
         char buffer[2];
         buffer[1] = 0;
         buffer[0] = actual;
         Serial.print(buffer);
-        Serial.print(" != ");
+        Serial.print("] != [");
         buffer[0] = expected;
         Serial.print(buffer);
+        Serial.println("]");
+
+        Serial.print("--> in function [");
+        Serial.print(function);
+        Serial.print("] in file [");
+        Serial.print(file);
+        Serial.print("] at line [");
+        Serial.print(line);
+        Serial.println("]");
+
+        return false;
+    }
+
+    bool EnsureStrEq(const core::String& actual, const core::String& expected, const char* labelActual, const char* labelExpected, const char* function, const char* file, const int line)
+    {
+        if (actual == expected) {
+            return true;
+        }
+        
+        Serial.print("ensureStrEq failed: actual[");
+        Serial.print(labelActual);
+        Serial.print("] != expected[");
+        Serial.print(labelExpected);
+        Serial.println("]");
+
+        Serial.print("--> [");
+        Serial.print(actual.c_str());
+        Serial.print("] != [");
+        Serial.print(expected.c_str());
         Serial.println("]");
 
         Serial.print("--> in function [");

@@ -23,12 +23,9 @@ namespace command
 
         Command.Data.SetSize(3 + labelLength);
         Command.Data.Add(input.id);
+        Command.Data.Add(input.pin);
         Command.Data.Add(static_cast<int>(input.type));
-        Command.Data.Add(labelLength);
-        for (int i=0; i<labelLength; i++)
-        {
-            Command.Data.Add(input.label[i]);
-        }
+        Command.Data.Add(input.label.c_str(), input.label.Length());
 
         return Command;
     }

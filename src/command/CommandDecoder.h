@@ -9,6 +9,12 @@ namespace command
     public:
         FCommandDecoder(FCommand& command);
 
+        bool RegisterInput(FInput& outInput);
+
+        bool InputValue(int& outId, int& outValue);
+
+        bool Message(core::String& outMessage);
+
     private:
         FCommand& Command;
     };

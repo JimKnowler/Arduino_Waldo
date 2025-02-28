@@ -34,6 +34,13 @@ namespace core
         Vector(const SliceT& slice);
 
         /**
+         * @brief Copy constructor
+         * 
+         * @param other the vector to copy
+         */
+        Vector(const Vector<T>& other);
+
+        /**
          * @brief Assignment operator
          * 
          * @param other the vector to copy
@@ -41,11 +48,11 @@ namespace core
         void operator=(const Vector<T>& other);
 
         /**
-         * @brief Copy constructor
+         * @brief Assignment operator (slice)
          * 
-         * @param other the vector to copy
+         * @param slice the slice to copy
          */
-        Vector(const Vector<T>& other);
+        void operator=(const SliceT& slice);
 
         /**
          * @brief add an element to the end of the vector
@@ -175,6 +182,20 @@ namespace core
 
         Data = malloc(sizeof(T) * DataSize);
         memcpy(Data, other.Data, sizeof(T) * Used);
+    }
+
+    template <typename T>
+    void Vector<T>::operator=(const Vector<T>::SliceT& slice) {
+        DataSize = slice.Length;
+        Used = slice.Length;
+        
+        if (Data) {
+            free(Data);
+            Data = nullptr;
+        }
+
+        Data = malloc(sizeof(T) * DataSize);
+        memcpy(Data, slice.Data, sizeof(T) * Used);
     }
 
     template <typename T>

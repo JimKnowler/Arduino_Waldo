@@ -1,11 +1,13 @@
 #include "TestCommands.h"
 
 #include "command/CommandEncoder.h"
+#include "command/CommandDecoder.h"
 #include "core/Ensure.h"
 #include "input/Input.h"
 
 namespace test 
 {
+    using command::FCommandDecoder;
     using command::FCommandEncoder;
     using command::FCommand;
     using command::ECommandType;
@@ -13,8 +15,10 @@ namespace test
     void FTestCommands::Run()
     {
         ShouldImplementCommandReset();
-        ShouldImplementCommandRegisterInput();
-        ShouldImplementCommandInputValue();
+        ShouldImplementCommandRegisterInputDigital();
+        ShouldImplementCommandRegisterInputAnalog();
+        ShouldImplementCommandInputValueDigital();
+        ShouldImplementCommandInputValueAnalog();
         ShouldImplementCommandStartFrame();
         ShouldImplementCommandEndFrame();
         ShouldImplementCommandMessage();
@@ -28,9 +32,9 @@ namespace test
         ensure(reset.GetData().Num() == 0);
     }
 
-    void FTestCommands::ShouldImplementCommandRegisterInput()
+    void FTestCommands::ShouldImplementCommandRegisterInputDigital()
     {
-        const FInput inputDigital = FInput{
+        const FInput kInputDigital = FInput{
             .label = "my digital input",
             .pin = 73,
             .id = 34,
@@ -38,12 +42,22 @@ namespace test
         };
 
         FCommand registerInputDigital;
-        FCommandEncoder(registerInputDigital).RegisterInput(inputDigital);
+        FCommandEncoder(registerInputDigital).RegisterInput(kInputDigital);
         ensure(registerInputDigital.GetType() == ECommandType::RegisterInput);
         ensure(registerInputDigital.GetData().Num() == 19);
-        // TODO: test inputs to command match the output of command parser
+        
+        FCommandDecoder decoder(registerInputDigital);
+        FInput inputDecoded;
+        ensure(decoder.RegisterInput(inputDecoded));
+        ensureStrEq(inputDecoded.label, kInputDigital.label);
+        ensureEq(inputDecoded.pin, kInputDigital.pin);
+        ensureEq(inputDecoded.id, kInputDigital.id);
+        ensureEq(inputDecoded.type, EInputType::Digital);
+    }
 
-        const FInput inputAnalog = FInput{
+    void FTestCommands::ShouldImplementCommandRegisterInputAnalog()
+    {
+        const FInput kInputAnalog = FInput{
             .label = "my analog input",
             .pin = 73,
             .id = 34,
@@ -51,39 +65,66 @@ namespace test
         };
 
         FCommand registerInputAnalog;
-        FCommandEncoder(registerInputAnalog).RegisterInput(inputAnalog);
+        FCommandEncoder(registerInputAnalog).RegisterInput(kInputAnalog);
         ensure(registerInputAnalog.GetType() == ECommandType::RegisterInput);
         ensure(registerInputAnalog.GetData().Num() == 18);
-        // TODO: test inputs to command match the output of command parser
+
+        FCommandDecoder decoder(registerInputAnalog);
+        FInput inputDecoded;
+        ensure(decoder.RegisterInput(inputDecoded));
+        ensureStrEq(inputDecoded.label, kInputAnalog.label);
+        ensureEq(inputDecoded.pin, kInputAnalog.pin);
+        ensureEq(inputDecoded.id, kInputAnalog.id);
+        ensureEq(inputDecoded.type, EInputType::Analog);
     }
 
-    void FTestCommands::ShouldImplementCommandInputValue()
+    void FTestCommands::ShouldImplementCommandInputValueDigital()
     {
-        const FInput inputDigital = FInput{
+        const FInput kInputDigital = FInput{
             .label = "my digital input",
             .pin = 73,
             .id = 34,
             .type = EInputType::Digital
         };
+        
+        const int kValue = 1;
 
         FCommand inputValueDigital;
-        FCommandEncoder(inputValueDigital).InputValue(inputDigital, 1);
+        FCommandEncoder(inputValueDigital).InputValue(kInputDigital, kValue);
         ensure(inputValueDigital.GetType() == ECommandType::InputValue);
         ensure(inputValueDigital.GetData().Num() == 2);
-        // TODO: test inputs to command match the output of command parser
+        
+        FCommandDecoder decoder(inputValueDigital);
+        int id = -1;
+        int value = -1;
+        ensure(decoder.InputValue(id, value));
+        ensureEq(id, kInputDigital.id);
+        ensureEq(value, kValue);
+    }
 
-        const FInput inputAnalog = FInput{
+    void FTestCommands::ShouldImplementCommandInputValueAnalog()
+    {
+        const FInput kInputAnalog = FInput{
             .label = "my analog input",
-            .pin = 73,
-            .id = 34,
+            .pin = 74,
+            .id = 35,
             .type = EInputType::Analog
         };
 
+        const int kValue = 1021;
+
         FCommand inputValueAnalog;
-        FCommandEncoder(inputValueAnalog).InputValue(inputAnalog, 1023);
+        FCommandEncoder(inputValueAnalog).InputValue(kInputAnalog, kValue);
         ensure(inputValueAnalog.GetType() == ECommandType::InputValue);
         ensure(inputValueAnalog.GetData().Num() == 2);
-        // TODO: test inputs to command match the output of command parser
+        
+        FCommandDecoder decoder(inputValueAnalog);
+        int id = -1;
+        int value = -1;
+        ensure(decoder.InputValue(id, value));
+        ensureEq(id, kInputAnalog.id);
+        const int kMappedValue = kValue / 4;
+        ensureEq(value, kMappedValue);
     }
 
     void FTestCommands::ShouldImplementCommandStartFrame()
@@ -109,6 +150,10 @@ namespace test
         FCommandEncoder(message).Message(strMessage);
         ensureCharEq(message.GetType(), ECommandType::Message);
         ensureEq(message.GetData().Num(), strMessage.Length());
-        // TODO: test inputs to command match the output of command parser
+        
+        FCommandDecoder decoder(message);
+        core::String strMessageDecoded;
+        ensure(decoder.Message(strMessageDecoded));
+        ensureStrEq(strMessageDecoded, strMessage);
     }
 }

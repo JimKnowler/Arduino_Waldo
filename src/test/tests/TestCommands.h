@@ -8,8 +8,10 @@ namespace test {
 
     private:
         void ShouldImplementCommandReset();
-        void ShouldImplementCommandRegisterInput();
-        void ShouldImplementCommandInputValue();
+        void ShouldImplementCommandRegisterInputDigital();
+        void ShouldImplementCommandRegisterInputAnalog();
+        void ShouldImplementCommandInputValueDigital();
+        void ShouldImplementCommandInputValueAnalog();
         void ShouldImplementCommandStartFrame();
         void ShouldImplementCommandEndFrame();
         void ShouldImplementCommandMessage();

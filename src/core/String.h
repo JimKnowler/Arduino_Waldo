@@ -18,8 +18,10 @@ namespace core
         String();
         String(const char* str);
         String& operator=(const char* str);
+        String& operator=(core::Slice<uint8_t> slice);
         String& operator+=(const char* str);
         const char operator[](int Index) const;
+        bool operator==(const String& other) const;
 
         const char* c_str() const;
 
@@ -57,6 +59,15 @@ namespace core
         return *this;
     }
 
+    inline String& String::operator=(core::Slice<uint8_t> slice)
+    {
+        Data.SetSize(slice.Length);
+        Data.Add(slice.Data + slice.Start, slice.Length);
+        Data.Add(0);
+
+        return *this;
+    }
+
     inline String& String::operator+=(const char* str) 
     {
         const int CurrentLength = Length();
@@ -78,6 +89,11 @@ namespace core
     inline const char String::operator[](int Index) const
     {
         return Data[Index];
+    }
+
+    inline bool String::operator==(const String& other) const
+    {
+        return strcmp(c_str(), other.c_str()) == 0;
     }
 
     inline const char* String::c_str() const
