@@ -50,8 +50,6 @@ namespace command
 
     void FCommandByteStream::Send(const FCommand& command)
     {
-        // TODO: move this to FCommandParser & rename as CommandByteStream or CommandProtocol?
-
         const core::Vector<uint8_t>& Data = command.GetData();
         const int numBytes = Data.Num();
         ensure(numBytes < 256);
