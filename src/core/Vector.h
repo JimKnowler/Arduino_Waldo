@@ -180,7 +180,10 @@ namespace core
             Data = nullptr;
         }
 
-        Data = malloc(sizeof(T) * DataSize);
+        const int numBytes = sizeof(T) * DataSize;
+        Data = malloc(numBytes);
+        memset(Data, 0, numBytes);        
+
         memcpy(Data, other.Data, sizeof(T) * Used);
     }
 
@@ -194,7 +197,10 @@ namespace core
             Data = nullptr;
         }
 
-        Data = malloc(sizeof(T) * DataSize);
+        const int numBytes = sizeof(T) * DataSize;
+        Data = malloc(numBytes);
+        memset(Data, 0, numBytes);
+
         memcpy(Data, slice.Data, sizeof(T) * Used);
     }
 
@@ -308,6 +314,7 @@ namespace core
 
         const int numBytes = sizeof(T) * DataSize;
         Data = malloc(numBytes);
+        memset(Data, 0, numBytes);
     }
 
     template <typename T>
