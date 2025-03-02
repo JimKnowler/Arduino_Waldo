@@ -1,6 +1,5 @@
 #include "Arduino_Waldo.h"
 
-#include "test/TestRunner.h"
 
 Waldo::Waldo()
 {
@@ -42,10 +41,4 @@ void Waldo::add_input_digital(const char* label, int pin)
 void Waldo::loop() 
 {
     Device.Loop();
-}
-
-void Waldo::test()
-{
-    test::FTestRunner TestRunner;
-    TestRunner.Run();
 }

@@ -2,7 +2,7 @@
 
 namespace command
 {
-    enum class ECommandType
+    enum class ECommandType : char
     {
         // Device
         Reset = 'R',
