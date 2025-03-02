@@ -9,8 +9,6 @@
 namespace test
 {
     void FTestRunner::Run() {
-        Serial.begin(500000);
-
         Serial.println(">>>>>> TestRunner: begin");
         Serial.println(".........................");
         Serial.flush();

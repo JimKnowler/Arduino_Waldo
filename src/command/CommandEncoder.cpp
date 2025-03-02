@@ -34,6 +34,7 @@ namespace command
     {
         Command.Type = ECommandType::InputValue;
 
+        // TODO: use uint8 for id, and add ensure/guards at the moment where we allocate a new id
         ensure(input.id >= 0);
         ensure(input.id < 256);
 

@@ -16,9 +16,6 @@ namespace command
 
     void FCommandByteStream::Setup()
     {
-        // TODO: is there any value in adding delay() here to prevent noise on serial connection?
-
-        Serial.begin(9600);        
     }
 
     void FCommandByteStream::Reset()
