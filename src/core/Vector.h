@@ -300,7 +300,9 @@ namespace core
 
     template <typename T>
     void Vector<T>::SetSize(int NewSize) {
-        if (DataSize == NewSize) {
+        Used = 0;
+        
+        if (DataSize >= NewSize) {
             return;
         }
 
@@ -310,8 +312,7 @@ namespace core
         }
 
         DataSize = NewSize;
-        Used = 0;
-
+        
         const int numBytes = sizeof(T) * DataSize;
         Data = malloc(numBytes);
         memset(Data, 0, numBytes);

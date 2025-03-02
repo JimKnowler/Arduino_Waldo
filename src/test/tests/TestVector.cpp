@@ -5,6 +5,11 @@
 
 namespace test
 {
+    // TODO: SetSize() after adding data - make sure that Used is reset to 0
+    //  - when setting a larger size
+    //  - when setting a smaller size
+    //  - when setting the same size as current
+
     void FTestVector::Run()
     {
         ShouldConstruct();
