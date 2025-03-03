@@ -11,7 +11,7 @@ namespace command
 
     FCommandByteStream::FCommandByteStream()
     {
-        Buffer.SetSize(32);
+        Buffer.Reset(32);
     }
 
     void FCommandByteStream::Setup()

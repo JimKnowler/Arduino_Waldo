@@ -10,7 +10,7 @@ namespace command
     FCommand& FCommandEncoder::Reset()
     {
         Command.Type = ECommandType::Reset;
-        Command.Data.SetSize(0);
+        Command.Data.Reset(0);
 
         return Command;
     }
@@ -21,7 +21,7 @@ namespace command
 
         const int labelLength = input.label.Length();
 
-        Command.Data.SetSize(3 + labelLength);
+        Command.Data.Reset(3 + labelLength);
         Command.Data.Add(input.id);
         Command.Data.Add(input.pin);
         Command.Data.Add(static_cast<int>(input.type));
@@ -61,7 +61,7 @@ namespace command
             }
         }
 
-        Command.Data.SetSize(2);
+        Command.Data.Reset(2);
         Command.Data.Add(input.id);
         Command.Data.Add(mappedValue);
 
@@ -71,7 +71,7 @@ namespace command
     FCommand& FCommandEncoder::StartFrame()
     {
         Command.Type = ECommandType::StartFrame;
-        Command.Data.SetSize(0);
+        Command.Data.Reset(0);
 
         return Command;
     }
@@ -79,7 +79,7 @@ namespace command
     FCommand& FCommandEncoder::EndFrame()
     {
         Command.Type = ECommandType::EndFrame;
-        Command.Data.SetSize(0);
+        Command.Data.Reset(0);
 
         return Command;
     }
@@ -89,7 +89,7 @@ namespace command
         Command.Type = ECommandType::Message;
 
         const int Length = message.Length();
-        Command.Data.SetSize(Length);
+        Command.Data.Reset(Length);
         Command.Data.Add(message.c_str(), Length);
 
         return Command;
@@ -98,7 +98,7 @@ namespace command
     FCommand& FCommandEncoder::AcknowledgeReset()
     {
         Command.Type = ECommandType::AcknowledgeReset;
-        Command.Data.SetSize(0);
+        Command.Data.Reset(0);
 
         return Command;
     }
@@ -106,7 +106,7 @@ namespace command
     FCommand& FCommandEncoder::AcknowledgeFrame()
     {
         Command.Type = ECommandType::AcknowledgeFrame;
-        Command.Data.SetSize(0);
+        Command.Data.Reset(0);
 
         return Command;
     }

@@ -98,19 +98,21 @@ namespace core
         const T* GetData() const;
 
         /**
-         * @brief Forcibly set the size of the vector to a new size, and erase all previous data 
-         * @note Underlying array of data is not initialized to valid or null values
+         * @brief Call destructor on all elements, and set the underlying size of the vector to a new size
+         * @note Underlying array of data is set to zero-d memory
          * @note No guarantee that the array will be reallocated
+         * @note After calling this function, Num() will return 0
          * @param NewSize The new size of the underlying data
          */
-        void SetSize(int NewSize);
+        void Reset(int NewSize = 0);
+
 
         /**
-         * @brief Reset the vector to an empty vector
-         * @note Does not change memory allocation
-         * @note Does not call destructor on elements
+         * @brief Resize the underlying data
+         * @note Call constructor on newly allocated elements, and destructor on old elements
+         * @param NewSize The new size of the underlying data
          */
-        void Reset();
+        void Resize(int NewSize);
 
         /**
          * @brief create a slice that references to a subsequence of the vector
@@ -157,7 +159,7 @@ namespace core
         const int sliceStart = slice.Start;
         const int sliceEnd = sliceStart + sliceLength;
 
-        SetSize(sliceLength);
+        Reset(sliceLength);
 
         for (int i=sliceStart; i<sliceEnd; i++)
         {
@@ -172,54 +174,29 @@ namespace core
 
     template <typename T>
     void Vector<T>::operator=(const Vector<T>& other) {
-        DataSize = other.DataSize;
-        Used = other.Used;
-        
-        if (Data) {
-            free(Data);
-            Data = nullptr;
-        }
-
-        const int numBytes = sizeof(T) * DataSize;
-        Data = malloc(numBytes);
-        memset(Data, 0, numBytes);        
-
-        memcpy(Data, other.Data, sizeof(T) * Used);
+        *this = other.Slice(0, other.Num());
     }
 
     template <typename T>
     void Vector<T>::operator=(const Vector<T>::SliceT& slice) {
-        DataSize = slice.Length;
-        Used = slice.Length;
+        Reset(slice.Length);
         
-        if (Data) {
-            free(Data);
-            Data = nullptr;
+        Used = slice.Length;
+
+        const T* source = slice.Data + slice.Start;
+        for (int i=0; i<Used; i++)
+        {
+            Data[i] = source[i];
         }
-
-        const int numBytes = sizeof(T) * DataSize;
-        Data = malloc(numBytes);
-        memset(Data, 0, numBytes);
-
-        memcpy(Data, slice.Data, sizeof(T) * Used);
     }
 
     template <typename T>
     void Vector<T>::Add(const T& element)
     {
         if (Data == nullptr) {
-            SetSize(kDefaultSize);
+            Reset(kDefaultSize);
         } else if (Used == DataSize) {
-            const T* oldData = Data;
-            Data = nullptr;
-
-            const int OldUsed = Used;
-            
-            SetSize(DataSize * 2);
-            
-            Used = OldUsed;
-            memcpy(Data, oldData, sizeof(T) * Used);
-            free(oldData);
+            Resize(DataSize * 2);
         }
 
         Data[Used] = element;
@@ -233,24 +210,14 @@ namespace core
         
         if (required > DataSize)
         {
-            int newSize = Max(DataSize, static_cast<int>(kDefaultSize));
-            while (newSize < required) {
-                newSize *= 2;
-            }
-
-            const T* oldData = Data;
-            Data = nullptr;
-
-            const int OldUsed = Used;
-            
-            SetSize(newSize);
-            
-            Used = OldUsed;
-            memcpy(Data, oldData, sizeof(T) * Used);
-            free(oldData);
+            Resize(required);
         }
 
-        memcpy(Data + Used, elements, sizeof(T) * num);        
+        for (int i=0; i<num; i++)
+        {
+            Data[Used + i] = elements[i];
+        }
+        
         Used += num;
     }
 
@@ -276,6 +243,9 @@ namespace core
         }
 
         Used -= 1;
+
+        Data[Used].~T();
+        memset(Data + Used, 0, sizeof(T));
     }
 
     template <typename T>
@@ -299,7 +269,15 @@ namespace core
     }
 
     template <typename T>
-    void Vector<T>::SetSize(int NewSize) {
+    void Vector<T>::Reset(int NewSize) {
+        for (int i=0; i<Used; i++) {
+            Data[i].~T();
+        }
+
+        // prevent future use of element assignment operator from trying to 
+        // cleanup any garbage left in Data
+        memset(Data, 0, Used * sizeof(T));
+        
         Used = 0;
         
         if (DataSize >= NewSize) {
@@ -311,7 +289,10 @@ namespace core
             Data = nullptr;
         }
 
-        DataSize = NewSize;
+        DataSize = Max(DataSize, static_cast<int>(kDefaultSize));
+        while (DataSize < NewSize) {
+            DataSize *= 2;
+        }
         
         const int numBytes = sizeof(T) * DataSize;
         Data = malloc(numBytes);
@@ -319,9 +300,42 @@ namespace core
     }
 
     template <typename T>
-    void Vector<T>::Reset()
+    void Vector<T>::Resize(int NewSize)
     {
-        Used = 0;
+        // TODO: this doesn't allow vector to shrink when resized
+
+        int newDataSize = Max(DataSize, static_cast<int>(kDefaultSize));
+        while (newDataSize < NewSize) {
+            newDataSize *= 2;
+        }
+
+        if (newDataSize == DataSize) {
+            return;
+        }
+
+        const T* oldData = Data;
+        Data = nullptr;
+
+        const int OldUsed = Used;
+        
+        DataSize = newDataSize;
+        Data = malloc(sizeof(T) * DataSize);
+        
+        Used = OldUsed;
+        memset(Data, 0, sizeof(T) * Used);
+
+        for (int i=0; i<Used; i++)
+        {
+            Data[i] = oldData[i];
+        }
+
+
+        for (int i=0; i<Used; i++)
+        {
+            Data[i].~T();
+        }
+
+        free(oldData);
     }
 
     template <typename T>

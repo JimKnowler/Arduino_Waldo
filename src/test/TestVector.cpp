@@ -100,47 +100,244 @@ test(Vector, ShouldAssign)
     assertEqual(vector2[4], 4);
 }
 
-test(Vector, ShouldSetSize)
+test(Vector, ShouldReset)
 {
     core::Vector<char> vector;
-    vector.SetSize(32);
+    vector.Reset(32);
     assertEqual(vector.Num(), 0);
     assertNotEqual(vector.GetData(), static_cast<char*>(nullptr));
 }
 
-test(Vector, ShouldSetSizeThenAddElements)
+test(Vector, ShouldResetThenAddElements)
 {
     const core::String message("my test message");
     const int Length = message.Length();
     
     core::Vector<char> vector;
-    vector.SetSize(Length);
+    vector.Reset(Length);
     vector.Add(message.c_str(), Length);
 }
 
-test(Vector, ShouldSetSmallerSize)
+test(Vector, ShouldResetWithSmallerSize)
 {
     core::Vector<char> vector;
-    vector.SetSize(32);
+    vector.Reset(32);
     vector.Add('a');
-    vector.SetSize(0);
+    vector.Reset(0);
     assertEqual(vector.Num(), 0);
 }
 
-test(Vector, ShouldSetLargerSize)
+test(Vector, ShouldResetWithLargerSize)
 {
     core::Vector<char> vector;
-    vector.SetSize(32);
+    vector.Reset(32);
     vector.Add('a');
-    vector.SetSize(64);
+    vector.Reset(64);
     assertEqual(vector.Num(), 0);
 }
 
-test(Vector, ShouldSetSameSize)
+test(Vector, ShouldResetWithSameSize)
 {
     core::Vector<char> vector;
-    vector.SetSize(32);
+    vector.Reset(32);
     vector.Add('a');
-    vector.SetSize(32);
+    vector.Reset(32);
     assertEqual(vector.Num(), 0);
+}
+
+namespace
+{
+    struct FMyType {
+        static int ConstructorCount;
+        static int DestructorCount;
+        static int AssignmentCount;
+        
+        FMyType(int id = 0) {
+            ConstructorCount += 1;
+            Id = id;
+        }
+
+        ~FMyType() {
+            DestructorCount += 1;
+        }
+
+        FMyType& operator=(const FMyType& Other) {
+            AssignmentCount += 1;
+        }
+
+        static void Reset() {
+            ConstructorCount = 0;
+            DestructorCount = 0;
+            AssignmentCount = 0;
+        }
+
+        int Id;
+    };
+
+    int FMyType::ConstructorCount = 0;
+    int FMyType::DestructorCount = 0;
+    int FMyType::AssignmentCount = 0;
+}
+
+test(Vector, ShouldDestructElementsWhenReset)
+{
+    FMyType::Reset();
+    core::Vector<FMyType> vector;
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 0);
+    assertEqual(FMyType::DestructorCount, 0);
+
+    FMyType::Reset();
+    vector.Reset(32);
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 0);
+    assertEqual(FMyType::DestructorCount, 0);
+
+    FMyType element;
+    FMyType::Reset();
+    vector.Add(element);
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 1);       // to copy element into place
+    assertEqual(FMyType::DestructorCount, 0);
+
+    FMyType::Reset();
+    vector.Reset(0);
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 0);
+    assertEqual(FMyType::DestructorCount, 1);       // destruct element in vector
+}
+
+test(Vector, ShouldDestructElementsWhenResized)
+{
+    core::Vector<FMyType> vector;
+    vector.Add(FMyType());
+    vector.Add(FMyType());
+
+    FMyType::Reset();
+    vector.Resize(128);
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 2);       // copy across 2 elements
+    assertEqual(FMyType::DestructorCount, 2);       // destroy 2 old elements
+}
+
+test(Vector, ShouldUseAssignmentWhenCopyingAnotherVector)
+{
+    core::Vector<FMyType> vector;
+    vector.Add(FMyType());
+    vector.Add(FMyType());
+
+    core::Vector<FMyType> vector2;
+    FMyType::Reset();
+    vector2 = vector;
+
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 2);       // copy across 2 elements
+    assertEqual(FMyType::DestructorCount, 0);
+}
+
+test(Vector, ShouldUseAssignmentWhenAddingAnElement)
+{
+    core::Vector<FMyType> vector;
+    FMyType element;
+    FMyType::Reset();
+
+    vector.Add(element);
+    
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 1);
+    assertEqual(FMyType::DestructorCount, 0);
+}
+
+test(Vector, ShouldUseAssignmentWhenAddingMultipleElements)
+{
+    core::Vector<FMyType> vector;
+    const int kArraySize = 5;
+    FMyType array[kArraySize];
+    FMyType::Reset();
+
+    vector.Add(array, kArraySize);
+    
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, kArraySize);
+    assertEqual(FMyType::DestructorCount, 0);
+}
+
+test(Vector, ShouldRemoveElement)
+{
+    core::Vector<int> vector;
+    vector.Add(1);
+    vector.Add(2);
+    vector.Add(3);
+
+    vector.Remove(1);
+    
+    assertEqual(vector.Num(), 2);
+    assertEqual(vector[0], 1);
+    assertEqual(vector[1], 3);
+}
+
+test(Vector, ShouldUseDestructorWhenRemovingElement)
+{
+    core::Vector<FMyType> vector;
+    vector.Add(FMyType(1));
+    vector.Add(FMyType(2));
+    vector.Add(FMyType(3));
+
+    FMyType::Reset();
+
+    vector.Remove(0);
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 2);       // copy down elements from indexes 1,2 to 0,1
+    assertEqual(FMyType::DestructorCount, 1);
+
+    FMyType::Reset();
+    vector.Remove(1);
+    assertEqual(FMyType::ConstructorCount, 0);
+    assertEqual(FMyType::AssignmentCount, 0);
+    assertEqual(FMyType::DestructorCount, 1);
+}
+
+namespace
+{
+    /**
+     * @brief a struct that allocates memory in constuctor, and frees it in destructor
+     * 
+     */
+    struct FMyComplexType
+    {
+        const int kDataSize = 16;
+
+        FMyComplexType() {
+            Data = malloc(kDataSize);
+        }
+
+        ~FMyComplexType() {
+            free(Data);
+        }
+
+        FMyComplexType& operator=(const FMyComplexType& Other)
+        {
+            // NOTE: assignment operator is required to prevent
+            //       class from just copying the 'Data' pointer,
+            //       which would lead to double-free crash
+
+            Data = malloc(kDataSize);
+            memcpy(Data, Other.Data, kDataSize);
+
+            return *this;
+        }
+
+        void* Data;
+    };
+}
+
+test(Vector, ShouldWorkWithComplexTypes)
+{
+    core::Vector<FMyComplexType> vector;
+    vector.Add(FMyComplexType());
+    vector.Add(FMyComplexType());
+    vector.Add(FMyComplexType());
+    vector.Add(FMyComplexType());
+    vector.Reset(16);
+    vector.Add(FMyComplexType());
 }

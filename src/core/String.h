@@ -33,7 +33,7 @@ namespace core
 
     inline String::String()
     {
-        Data.SetSize(1);
+        Data.Reset(1);
         Data.Add(0);
     }
 
@@ -46,7 +46,7 @@ namespace core
     {
         // resize the underlying buffer (with space for null terminator)
         const int Length = strlen(str);
-        Data.SetSize(Length + 1);
+        Data.Reset(Length + 1);
 
         // copy across the string
         for (const char* p = str; *p != 0; p++) 
@@ -61,7 +61,7 @@ namespace core
 
     inline String& String::operator=(core::Slice<uint8_t> slice)
     {
-        Data.SetSize(slice.Length);
+        Data.Reset(slice.Length);
         Data.Add(slice.Data + slice.Start, slice.Length);
         Data.Add(0);
 
