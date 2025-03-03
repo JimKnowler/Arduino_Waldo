@@ -1,5 +1,7 @@
 // Run Waldo automated unit tests
 
+#include <Arduino_Waldo.h>
+
 #include <AUnit.h>
 
 void setup() {
