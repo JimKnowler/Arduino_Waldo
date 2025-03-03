@@ -1,62 +1,51 @@
-#include "TestString.h"
+#include "Test.h"
 
 #include "core/String.h"
 
-namespace test
+
+test(String, ShouldConstruct)
 {
-    void FTestString::Run()
-    {
-        ShouldConstruct();
-        ShouldConstructFromRawString();
-        ShouldCopyConstruct();
-        ShouldAssignRawString();
-    }
+    const core::String string;
+    assertEqual(string.Length(), 0);
+    assertEqualChar(string[0], 0);
+}
 
-    void FTestString::ShouldConstruct()
-    {
-        const core::String string;
-        ensureEq(string.Length(), 0);
-        ensureEq(string[0], 0);
-    }
+test(String, ShouldConstructFromRawString)
+{
+    const core::String string("hello");
+    assertEqual(string.Length(), 5);
+    assertEqualChar(string[0], 'h');
+    assertEqualChar(string[1], 'e');
+    assertEqualChar(string[2], 'l');
+    assertEqualChar(string[3], 'l');
+    assertEqualChar(string[4], 'o');
+    assertEqualChar(string[5], 0);
+}
 
-    void FTestString::ShouldConstructFromRawString()
-    {
-        const core::String string("hello");
-        ensureEq(string.Length(), 5);
-        ensureCharEq(string[0], 'h');
-        ensureCharEq(string[1], 'e');
-        ensureCharEq(string[2], 'l');
-        ensureCharEq(string[3], 'l');
-        ensureCharEq(string[4], 'o');
-        ensureCharEq(string[5], 0);
-    }
+test(String, ShouldCopyConstruct)
+{
+    const core::String string("hello");
+    const core::String stringCopy(string);
 
-    void FTestString::ShouldCopyConstruct()
-    {
-        const core::String string("hello");
-        const core::String stringCopy(string);
+    assertEqual(stringCopy.Length(), 5);
+    assertEqualChar(stringCopy[0], 'h');
+    assertEqualChar(stringCopy[1], 'e');
+    assertEqualChar(stringCopy[2], 'l');
+    assertEqualChar(stringCopy[3], 'l');
+    assertEqualChar(stringCopy[4], 'o');
+    assertEqualChar(stringCopy[5], 0);
+}
 
-        ensureEq(stringCopy.Length(), 5);
-        ensureCharEq(stringCopy[0], 'h');
-        ensureCharEq(stringCopy[1], 'e');
-        ensureCharEq(stringCopy[2], 'l');
-        ensureCharEq(stringCopy[3], 'l');
-        ensureCharEq(stringCopy[4], 'o');
-        ensureCharEq(stringCopy[5], 0);
-    }
+test(String, ShouldAssignRawString)
+{
+    core::String string;
 
-    void FTestString::ShouldAssignRawString()
-    {
-        core::String string;
-
-        string = "hello";
-        ensureEq(string.Length(), 5);
-        ensureCharEq(string[0], 'h');
-        ensureCharEq(string[1], 'e');
-        ensureCharEq(string[2], 'l');
-        ensureCharEq(string[3], 'l');
-        ensureCharEq(string[4], 'o');
-        ensureCharEq(string[5], 0);
-    }
-
+    string = "hello";
+    assertEqual(string.Length(), 5);
+    assertEqualChar(string[0], 'h');
+    assertEqualChar(string[1], 'e');
+    assertEqualChar(string[2], 'l');
+    assertEqualChar(string[3], 'l');
+    assertEqualChar(string[4], 'o');
+    assertEqualChar(string[5], 0);
 }

@@ -2,17 +2,12 @@
 #include "command/CommandDecoder.h"
 #include "core/Ensure.h"
 #include "input/Input.h"
-
-#include <AUnit.h>
-using namespace aunit;
+#include "Test.h"
 
 using command::FCommandDecoder;
 using command::FCommandEncoder;
 using command::FCommand;
 using command::ECommandType;
-
-#define assertEqualChar(_a, _b) assertEqual(static_cast<char>(_a), static_cast<char>(_b))
-#define assertEqualStr(_a, _b) assertEqual((_a).c_str(), (_b).c_str())
 
 test(Command, ShouldImplementCommandReset)
 {
