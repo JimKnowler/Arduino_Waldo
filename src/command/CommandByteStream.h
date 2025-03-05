@@ -30,5 +30,7 @@ namespace command
         void ParseCommandAndConsumeBuffer(FCommand& OutCommand);
 
         core::Vector<uint8_t> Buffer;
+
+        core::Vector<uint8_t> Guard;
     };
 }

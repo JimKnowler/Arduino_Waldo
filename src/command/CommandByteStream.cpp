@@ -12,6 +12,8 @@ namespace command
     FCommandByteStream::FCommandByteStream()
     {
         Buffer.Reset(32);
+        const uint8_t GuardData[] = {'W','A','L','D','O'};
+        Guard.Add(GuardData, 5);
     }
 
     void FCommandByteStream::Setup()
@@ -53,6 +55,9 @@ namespace command
 
         const uint8_t type = static_cast<uint8_t>(command.GetType());
 
+        // 5 bytes - Guard
+        Serial.write(Guard.GetData(), Guard.Num());
+
         // 1 byte - type
         Serial.write(type);
 
@@ -62,6 +67,7 @@ namespace command
         // n bytes - payload
         Serial.write(Data.GetData(), numBytes);
 
+        // wait until data has been sent
         Serial.flush();
     }
 
