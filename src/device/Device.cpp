@@ -33,24 +33,39 @@ namespace device
                 ByteStream.Send(Encoder.Reset());
                 CurrentState = State::WaitAcknowledgeReset;
                 break;
-            case State::WaitAcknowledgeReset:            
+            case State::WaitAcknowledgeReset:
+            {
                 if (!ByteStream.Receive(Command)) {
                     // not enough data from host to parse a command
                     break;
                 }
                 
-                if (Command.GetType() != command::ECommandType::AcknowledgeReset) {
-                    // ignore unexpected command from host
-                    break;
+                switch (Command.GetType())
+                {
+                    case command::ECommandType::AcknowledgeReset:
+                    {
+                        SendInputRegistrations();
+
+                        NumFramesInFlight = 0;
+                        
+                        CurrentState = State::SendFrame;
+
+                        break;
+                    }
+                    case command::ECommandType::Reset:
+                    {
+                        CurrentState = State::Reset;
+
+                        break;
+                    }
+                    default:
+                        break;
                 }
-
-                SendInputRegistrations();
-
-                NumFramesInFlight = 0;
                 
-                CurrentState = State::SendFrame;
                 break;
+            }
             case State::SendFrame:
+            {
                 ByteStream.Send(Encoder.StartFrame());
 
                 SendInputValues();
@@ -62,25 +77,40 @@ namespace device
                 if (NumFramesInFlight >= kMaxNumFramesInFlight) {
                     CurrentState = State::WaitAcknowledgeFrame;
                 }
+            
                 break;
+            }
             case State::WaitAcknowledgeFrame:
+            {
                 if (!ByteStream.Receive(Command)) {
                     // not enough data from host to receive a command
                     break;
                 }
 
-                if (Command.GetType() != command::ECommandType::AcknowledgeFrame) {
-                    // ignore unexpected command from host
-                    break;
-                }
+                switch (Command.GetType())
+                {
+                    case command::ECommandType::AcknowledgeFrame:
+                    {
+                        NumFramesInFlight -= 1;
+                        
+                        if (NumFramesInFlight < kMaxNumFramesInFlight) {
+                            CurrentState = State::SendFrame;
+                        }
+            
+                        break;
+                    }
+                    case command::ECommandType::Reset:
+                    {
+                        CurrentState = State::Reset;
 
-                NumFramesInFlight -= 1;
-                
-                if (NumFramesInFlight < kMaxNumFramesInFlight) {
-                    CurrentState = State::SendFrame;
-                }
+                        break;
+                    }
+                    default:
+                        break;
+                }             
 
                 break;
+            }
             case State::None:
             default:
                 break;

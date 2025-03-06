@@ -5,7 +5,6 @@ namespace command
     enum class ECommandType : char
     {
         // Device
-        Reset = 'R',
         RegisterInput = 'I',
         StartFrame = 'F',
         InputValue = 'V',
@@ -14,6 +13,9 @@ namespace command
         
         // Host
         AcknowledgeReset = 'A',
-        AcknowledgeFrame = 'K'
+        AcknowledgeFrame = 'K',
+
+        // Device + Host
+        Reset = 'R',
     };
 }
