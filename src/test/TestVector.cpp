@@ -269,7 +269,7 @@ test(Vector, ShouldRemoveElement)
     vector.Add(2);
     vector.Add(3);
 
-    vector.Remove(1);
+    vector.RemoveAt(1);
     
     assertEqual(vector.Num(), 2);
     assertEqual(vector[0], 1);
@@ -285,13 +285,13 @@ test(Vector, ShouldUseDestructorWhenRemovingElement)
 
     FMyType::Reset();
 
-    vector.Remove(0);
+    vector.RemoveAt(0);
     assertEqual(FMyType::ConstructorCount, 0);
     assertEqual(FMyType::AssignmentCount, 2);       // copy down elements from indexes 1,2 to 0,1
     assertEqual(FMyType::DestructorCount, 1);
 
     FMyType::Reset();
-    vector.Remove(1);
+    vector.RemoveAt(1);
     assertEqual(FMyType::ConstructorCount, 0);
     assertEqual(FMyType::AssignmentCount, 0);
     assertEqual(FMyType::DestructorCount, 1);

@@ -73,7 +73,7 @@ namespace core
         const int CurrentLength = Length();
 
         // remove the null pointer
-        Data.Remove(CurrentLength);
+        Data.RemoveAt(CurrentLength);
 
         // add new string
         for (const char* p = str; *p != 0; p++) 

@@ -66,6 +66,8 @@ namespace core
          * 
          * @param elements the array of elements to add
          * @param num the number of elements to add
+         * 
+         * @todo rename as 'append()'
          */
         void Add(const T* elements, int num);
 
@@ -77,11 +79,18 @@ namespace core
         int Num() const;
 
         /**
+         * @brief retport whether the vector is empty
+         * 
+         * @return true, if the vector is empty
+         */
+        bool IsEmpty() const;
+
+        /**
          * @brief remove an element from the vector
          * 
          * @param Index The index of the element to remove from the vector
          */
-        void Remove(int Index);
+        void RemoveAt(int Index);
 
         /**
          * @brief access an element in the vector
@@ -228,7 +237,15 @@ namespace core
     }
 
     template <typename T>
-    void Vector<T>::Remove(int Index)
+    bool Vector<T>::IsEmpty() const
+    {
+        const bool bIsEmpty = (Num() == 0);
+        
+        return bIsEmpty;
+    }
+
+    template <typename T>
+    void Vector<T>::RemoveAt(int Index)
     {
         if (!ensure(Index < Used)) {
             return;

@@ -23,6 +23,8 @@ namespace command
         void Send(const FCommand& Command);
 
     private:
+        void SkipToGuard();
+
         // is there enough data in the buffer to parse the next command
         bool IsReadyToParseCommand() const;
 

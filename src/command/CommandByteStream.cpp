@@ -6,12 +6,15 @@
 
 namespace command
 {
-    // TODO: ignore random data in serial comms, until a command is available
-    //       header/footer for each command?
+    namespace
+    {
+        constexpr int CommandHeaderSize = 2;                // [0] = Type, [1] = Size
+    }
 
     FCommandByteStream::FCommandByteStream()
     {
         Buffer.Reset(32);
+        
         const uint8_t GuardData[] = {'W','A','L','D','O'};
         Guard.Add(GuardData, 5);
     }
@@ -34,6 +37,8 @@ namespace command
             const int byte = Serial.read();
 
             Buffer.Add(byte);
+
+            SkipToGuard();
 
             if (IsReadyToParseCommand())
             {
@@ -71,16 +76,42 @@ namespace command
         Serial.flush();
     }
 
+    void FCommandByteStream::SkipToGuard()
+    {
+        while (!Buffer.IsEmpty())
+        {
+            bool bHasValidGuard = true;
+            
+            const int GuardSize = core::Min(Guard.Num(), Buffer.Num());
+            
+            for (int i=0; i<GuardSize; i++)
+            {
+                if (Buffer[i] != Guard[i])
+                {
+                    Buffer.RemoveAt(0);
+                    bHasValidGuard = false;
+                    break;
+                }
+            }
+
+            if (bHasValidGuard)
+            {
+                return;
+            }
+        }
+    }
+
     bool FCommandByteStream::IsReadyToParseCommand() const
     {
+        const int GuardSize = Guard.Num();
         const int BufferSize = Buffer.Num();
-
-        if (BufferSize < 2) {
+        
+        if (BufferSize < (GuardSize + CommandHeaderSize)) {
             return false;
         }
 
-        const int CommandPayloadSize = Buffer[1];
-        const int CommandSize = 2 + CommandPayloadSize;
+        const int CommandPayloadSize = Buffer[GuardSize + 1];
+        const int CommandSize = GuardSize + CommandHeaderSize + CommandPayloadSize;
         if (BufferSize < CommandSize) 
         {
             return false;
@@ -93,14 +124,17 @@ namespace command
 
     void FCommandByteStream::ParseCommandAndConsumeBuffer(FCommand& OutCommand)
     {
-        const int Type = Buffer[0];
-        const int CommandPayloadSize = Buffer[1];
+        const int GuardSize = Guard.Num();
+    
+        const int Type = Buffer[GuardSize + 0];
+        const int CommandPayloadSize = Buffer[GuardSize + 1];
 
-        const int CommandSize = 2 + CommandPayloadSize;
+        const int CommandSize = GuardSize + CommandHeaderSize + CommandPayloadSize;
         ensure(Buffer.Num() == CommandSize);
 
         OutCommand.Type = static_cast<ECommandType>(Type);
-        OutCommand.Data = Buffer.Slice(2, CommandPayloadSize);
+        OutCommand.Data.Reset();
+        OutCommand.Data.Add(Buffer.GetData() + GuardSize + CommandHeaderSize, CommandPayloadSize);
 
         Buffer.Reset();
     }
