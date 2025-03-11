@@ -1,8 +1,13 @@
 #include "Device.h"
 
+#include <Arduino.h>
+
+#define USE_TIMEOUT 0
+
 namespace device 
 {
     static const int kMaxNumFramesInFlight = 3;
+    static const unsigned long kMaxMillisBetweenCommands = 500;
 
     FDevice::FDevice() : Encoder(Command)
     {
@@ -11,11 +16,13 @@ namespace device
 
     void FDevice::Setup()
     {
-        ByteStream.Setup();
+        ByteStream.Reset();
 
         ByteStream.Send(Encoder.Message("Arduino Waldo Setup"));
     
         CurrentState = State::Reset;
+
+        TimeLastCommand = millis();
     }
 
     void FDevice::AddInput(const FInput& input)
@@ -35,7 +42,7 @@ namespace device
                 break;
             case State::WaitAcknowledgeReset:
             {
-                if (!ByteStream.Receive(Command)) {
+                if (!ReceiveCommand(Command)) {
                     // not enough data from host to parse a command
                     break;
                 }
@@ -72,7 +79,7 @@ namespace device
 
                 ByteStream.Send(Encoder.EndFrame());
 
-                NumFramesInFlight += 1;
+                NumFramesInFlight = core::Min(NumFramesInFlight + 1, kMaxNumFramesInFlight);
                 
                 if (NumFramesInFlight >= kMaxNumFramesInFlight) {
                     CurrentState = State::WaitAcknowledgeFrame;
@@ -82,7 +89,7 @@ namespace device
             }
             case State::WaitAcknowledgeFrame:
             {
-                if (!ByteStream.Receive(Command)) {
+                if (!ReceiveCommand(Command)) {
                     // not enough data from host to receive a command
                     break;
                 }
@@ -91,7 +98,7 @@ namespace device
                 {
                     case command::ECommandType::AcknowledgeFrame:
                     {
-                        NumFramesInFlight -= 1;
+                        NumFramesInFlight = core::Max(NumFramesInFlight - 1, 0);
                         
                         if (NumFramesInFlight < kMaxNumFramesInFlight) {
                             CurrentState = State::SendFrame;
@@ -159,6 +166,34 @@ namespace device
 
             ByteStream.Send(Encoder.InputValue(input, value));
         }
+    }
+
+    bool FDevice::ReceiveCommand(command::FCommand& OutCommand)
+    {
+        const unsigned long currentTime = millis();
+
+        if (ByteStream.Receive(Command))
+        {
+            TimeLastCommand = currentTime;
+
+            return true;
+        }        
+
+#if USE_TIMEOUT
+        const unsigned long elapsed = currentTime - TimeLastCommand;
+
+        if (elapsed > kMaxMillisBetweenCommands)
+        {
+            ByteStream.Send(Encoder.Message("timeout\n"));
+
+            ByteStream.Reset();
+            TimeLastCommand = currentTime;
+            CurrentState = State::WaitAcknowledgeReset;
+            NumFramesInFlight = 0;
+        }
+#endif
+
+        return false;
     }
 
 } // namespace device 

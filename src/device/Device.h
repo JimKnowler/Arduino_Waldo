@@ -26,6 +26,7 @@ namespace device
     private:
         void SendInputRegistrations();
         void SendInputValues();
+        bool ReceiveCommand(command::FCommand& OutCommand);
 
         command::FCommandByteStream ByteStream;
         command::FCommandEncoder Encoder;
@@ -38,5 +39,7 @@ namespace device
         core::Vector<FInput> Inputs;
 
         State CurrentState = State::None;
+
+        unsigned long TimeLastCommand = 0;
     };
 }

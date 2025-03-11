@@ -19,10 +19,6 @@ namespace command
         Guard.Add(GuardData, 5);
     }
 
-    void FCommandByteStream::Setup()
-    {
-    }
-
     void FCommandByteStream::Reset()
     {
         Buffer.Reset();
