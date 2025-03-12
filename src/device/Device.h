@@ -24,13 +24,15 @@ namespace device
         int AssignInputId();
 
     private:
+        void SetState(State NewState);
         void SendInputRegistrations();
         void SendInputValues();
         bool ReceiveCommand(command::FCommand& OutCommand);
 
         command::FCommandByteStream ByteStream;
         command::FCommandEncoder Encoder;
-        command::FCommand Command;
+        command::FCommand DecodeCommand;
+        command::FCommand EncodeCommand;
 
         int NumFramesInFlight = 0;
 

@@ -2,7 +2,7 @@
 
 enum class State
 {
-    None,
+    None = 0,
     Reset,
     WaitAcknowledgeReset,
     SendFrame,

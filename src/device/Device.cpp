@@ -2,14 +2,27 @@
 
 #include <Arduino.h>
 
-#define USE_TIMEOUT 0
+// Enable whether the device will timeout and restart connection
+#define ENABLE_TIMEOUT 1
+
+// Debug receiving commands, by echoing them back to host as messages
+#define ENABLE_ECHO_COMMANDS 0
+
+// Debug current state, by reporting it to host every loop in a message
+#define ENABLE_ECHO_STATE 0
+
+// Debug state changes, by reporting them to host as messages
+#define ENABLE_ECHO_STATE_CHANGES 0
+
+// Debug timeouts, by reporting them to host as messages
+#define ENABLE_ECHO_TIMEOUT 0
 
 namespace device 
 {
     static const int kMaxNumFramesInFlight = 3;
-    static const unsigned long kMaxMillisBetweenCommands = 500;
+    static const unsigned long kMaxMillisBetweenCommands = 2000;
 
-    FDevice::FDevice() : Encoder(Command)
+    FDevice::FDevice() : Encoder(EncodeCommand)
     {
         
     }
@@ -20,7 +33,7 @@ namespace device
 
         ByteStream.Send(Encoder.Message("Arduino Waldo Setup"));
     
-        CurrentState = State::Reset;
+        SetState(State::Reset);
 
         TimeLastCommand = millis();
     }
@@ -34,20 +47,28 @@ namespace device
 
     void FDevice::Loop()
     {
+#if ENABLE_ECHO_STATE
+        {
+            char temp[64];
+            sprintf(temp, "current state [%d] time since last command [%lu]",
+                static_cast<int>(CurrentState), (millis() - TimeLastCommand));
+            ByteStream.Send(Encoder.Message(temp));
+        }
+#endif
         switch (CurrentState)
         {
             case State::Reset:
                 ByteStream.Send(Encoder.Reset());
-                CurrentState = State::WaitAcknowledgeReset;
+                SetState(State::WaitAcknowledgeReset);
                 break;
             case State::WaitAcknowledgeReset:
             {
-                if (!ReceiveCommand(Command)) {
+                if (!ReceiveCommand(DecodeCommand)) {
                     // not enough data from host to parse a command
                     break;
                 }
                 
-                switch (Command.GetType())
+                switch (DecodeCommand.GetType())
                 {
                     case command::ECommandType::AcknowledgeReset:
                     {
@@ -55,13 +76,13 @@ namespace device
 
                         NumFramesInFlight = 0;
                         
-                        CurrentState = State::SendFrame;
+                        SetState(State::SendFrame);
 
                         break;
                     }
                     case command::ECommandType::Reset:
                     {
-                        CurrentState = State::Reset;
+                        SetState(State::Reset);
 
                         break;
                     }
@@ -82,33 +103,33 @@ namespace device
                 NumFramesInFlight = core::Min(NumFramesInFlight + 1, kMaxNumFramesInFlight);
                 
                 if (NumFramesInFlight >= kMaxNumFramesInFlight) {
-                    CurrentState = State::WaitAcknowledgeFrame;
+                    SetState(State::WaitAcknowledgeFrame);
                 }
             
                 break;
             }
             case State::WaitAcknowledgeFrame:
             {
-                if (!ReceiveCommand(Command)) {
+                if (!ReceiveCommand(DecodeCommand)) {
                     // not enough data from host to receive a command
                     break;
                 }
 
-                switch (Command.GetType())
+                switch (DecodeCommand.GetType())
                 {
                     case command::ECommandType::AcknowledgeFrame:
                     {
                         NumFramesInFlight = core::Max(NumFramesInFlight - 1, 0);
                         
                         if (NumFramesInFlight < kMaxNumFramesInFlight) {
-                            CurrentState = State::SendFrame;
+                            SetState(State::SendFrame);
                         }
             
                         break;
                     }
                     case command::ECommandType::Reset:
                     {
-                        CurrentState = State::Reset;
+                        SetState(State::Reset);
 
                         break;
                     }
@@ -172,28 +193,53 @@ namespace device
     {
         const unsigned long currentTime = millis();
 
-        if (ByteStream.Receive(Command))
+        if (ByteStream.Receive(OutCommand))
         {
             TimeLastCommand = currentTime;
+
+#if ENABLE_ECHO_COMMANDS
+            {
+                char temp[64];
+                sprintf(temp, "received command [%c] while in state [%d]",
+                    static_cast<char>(OutCommand.GetType()), static_cast<int>(CurrentState));
+                ByteStream.Send(Encoder.Message(temp));
+            }
+#endif
 
             return true;
         }        
 
-#if USE_TIMEOUT
+#if ENABLE_TIMEOUT
         const unsigned long elapsed = currentTime - TimeLastCommand;
 
         if (elapsed > kMaxMillisBetweenCommands)
         {
-            ByteStream.Send(Encoder.Message("timeout\n"));
+#if ENABLE_ECHO_TIMEOUT
+            {
+                char temp[64];
+                sprintf(temp, "timeout - while in state [%d]", static_cast<int>(CurrentState));
+                ByteStream.Send(Encoder.Message(temp));
+            }
+#endif
 
             ByteStream.Reset();
             TimeLastCommand = currentTime;
-            CurrentState = State::WaitAcknowledgeReset;
+            SetState(State::WaitAcknowledgeReset);
             NumFramesInFlight = 0;
         }
 #endif
 
         return false;
+    }
+
+    void FDevice::SetState(State NewState)
+    {
+#if ENABLE_ECHO_STATE_CHANGES
+        char temp[64];
+        sprintf(temp, "SetState [%d] - while in state [%d]", static_cast<int>(NewState), static_cast<int>(CurrentState));
+        ByteStream.Send(Encoder.Message(temp));
+#endif 
+        CurrentState = NewState;
     }
 
 } // namespace device 
