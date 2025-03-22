@@ -1,5 +1,7 @@
 #include "Test.h"
 
+#if ENABLE_WALDO_TESTS
+
 #include "core/String.h"
 
 
@@ -49,3 +51,5 @@ test(String, ShouldAssignRawString)
     assertEqualChar(string[4], 'o');
     assertEqualChar(string[5], 0);
 }
+
+#endif

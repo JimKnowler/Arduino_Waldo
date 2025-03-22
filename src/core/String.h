@@ -18,7 +18,7 @@ namespace core
         String();
         String(const char* str);
         String& operator=(const char* str);
-        String& operator=(core::Slice<uint8_t> slice);
+        String& operator=(const core::Slice<uint8_t>& slice);
         String& operator+=(const char* str);
         const char operator[](int Index) const;
         bool operator==(const String& other) const;
@@ -59,10 +59,13 @@ namespace core
         return *this;
     }
 
-    inline String& String::operator=(core::Slice<uint8_t> slice)
+    inline String& String::operator=(const core::Slice<uint8_t>& slice)
     {
         Data.Reset(slice.Length);
-        Data.Add(slice.Data + slice.Start, slice.Length);
+        
+        const char* SliceData = reinterpret_cast<char*>(slice.Data + slice.Start);
+        const int SliceLength = slice.Length;
+        Data.Add(SliceData, SliceLength);
         Data.Add(0);
 
         return *this;

@@ -21,7 +21,7 @@ namespace core
             kDefaultSize = 4
         };
 
-        typedef Slice<T> SliceT;
+        typedef struct Slice<T> SliceT;
 
         Vector();
         ~Vector();
@@ -101,6 +101,14 @@ namespace core
         T& operator[](int Index);
 
         /**
+         * @brief access an element in the vector
+         * 
+         * @param Index the index of the element in the vector
+         * @return a reference to the element in the vector
+         */
+        const T& operator[](int Index) const;
+
+        /**
          * @brief Get pointer to the underlying data array for this vector
          * @return Point to underlying data array
          */
@@ -133,7 +141,7 @@ namespace core
          * @param Length Number of elements
          * @return Slice that references part of this vector
          */
-        Slice<T> Slice(int Start, int Length);
+        SliceT Slice(int Start, int Length) const;
 
     private:
         // actual size of data array
@@ -268,13 +276,17 @@ namespace core
     template <typename T>
     T& Vector<T>::operator[](int Index)
     {
-        if (!ensure(Index < Used)) {
-            return;
-        }
+        ensure(Index < Used);
+        ensure(Index >= 0);
 
-        if (!ensure(Index >= 0)) {
-            return;
-        }
+        return Data[Index];
+    }
+
+    template <typename T>
+    const T& Vector<T>::operator[](int Index) const
+    {
+        ensure(Index < Used);
+        ensure(Index >= 0);
 
         return Data[Index];
     }
@@ -312,7 +324,7 @@ namespace core
         }
         
         const int numBytes = sizeof(T) * DataSize;
-        Data = malloc(numBytes);
+        Data = reinterpret_cast<T*>(malloc(numBytes));
         memset(Data, 0, numBytes);
     }
 
@@ -330,13 +342,13 @@ namespace core
             return;
         }
 
-        const T* oldData = Data;
+        T* oldData = Data;
         Data = nullptr;
 
         const int OldUsed = Used;
         
         DataSize = newDataSize;
-        Data = malloc(sizeof(T) * DataSize);
+        Data = reinterpret_cast<T*>(malloc(sizeof(T) * DataSize));
         
         Used = OldUsed;
         memset(Data, 0, sizeof(T) * Used);
@@ -356,7 +368,7 @@ namespace core
     }
 
     template <typename T>
-    Slice<T> Vector<T>::Slice(int Start, int Length)
+    auto Vector<T>::Slice(int Start, int Length) const -> Vector<T>::SliceT 
     {
         ensure(Start >= 0);
         ensure((Start + Length) <= Used);

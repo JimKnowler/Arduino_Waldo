@@ -1,8 +1,11 @@
+#include "Test.h"
+
+#if ENABLE_WALDO_TESTS
+
 #include "command/CommandEncoder.h"
 #include "command/CommandDecoder.h"
 #include "core/Ensure.h"
 #include "input/Input.h"
-#include "Test.h"
 
 using command::FCommandDecoder;
 using command::FCommandEncoder;
@@ -141,3 +144,5 @@ test(Command, ShouldImplementCommandMessage)
     assertTrue(decoder.Message(strMessageDecoded));
     assertEqualStr(strMessageDecoded, strMessage);
 }
+
+#endif

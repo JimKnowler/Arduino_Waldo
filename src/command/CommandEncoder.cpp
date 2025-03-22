@@ -25,7 +25,9 @@ namespace command
         Command.Data.Add(input.id);
         Command.Data.Add(input.pin);
         Command.Data.Add(static_cast<int>(input.type));
-        Command.Data.Add(input.label.c_str(), input.label.Length());
+        const uint8_t* Label = reinterpret_cast<const uint8_t*>(input.label.c_str());
+        const int LabelLength = input.label.Length();
+        Command.Data.Add(Label, LabelLength);
 
         return Command;
     }
@@ -90,7 +92,7 @@ namespace command
 
         const int Length = message.Length();
         Command.Data.Reset(Length);
-        Command.Data.Add(message.c_str(), Length);
+        Command.Data.Add(reinterpret_cast<const uint8_t*>(message.c_str()), Length);
 
         return Command;
     }

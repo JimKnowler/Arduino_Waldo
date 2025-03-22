@@ -1,5 +1,7 @@
 #include "Test.h"
 
+#if ENABLE_WALDO_TESTS
+
 #include "core/Vector.h"
 #include "core/String.h"
 
@@ -341,3 +343,5 @@ test(Vector, ShouldWorkWithComplexTypes)
     vector.Reset(16);
     vector.Add(FMyComplexType());
 }
+
+#endif
