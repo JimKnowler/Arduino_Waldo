@@ -19,7 +19,6 @@ jobs:
       - name: Run arduino-lint
         uses: arduino/arduino-lint-action@v2.0.0
         with:
-          path: "."
           compliance: "strict"
           library-manager: "submit"
           project-type: "library"
