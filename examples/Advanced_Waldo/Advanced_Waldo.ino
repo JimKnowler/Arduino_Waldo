@@ -3,7 +3,7 @@
 // - Potentiometers connected to A0 for the 'mouth' & A1 for the 'head'
 // - Push button connected to D0 for blinking
 
-#include <Arduino_Waldo.h>
+#include <Waldo.h>
 
 Waldo waldo;
 

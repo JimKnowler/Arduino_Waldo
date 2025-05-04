@@ -2,7 +2,7 @@
 //
 // Using a single potentiometer connected to A0 for the 'mouth'
 
-#include <Arduino_Waldo.h>
+#include <Waldo.h>
 
 Waldo waldo;
 
