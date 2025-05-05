@@ -1,4 +1,4 @@
-#include "Arduino_Waldo.h"
+#include "Waldo.h"
 
 
 Waldo::Waldo()
