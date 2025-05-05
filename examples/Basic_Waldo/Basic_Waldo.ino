@@ -8,6 +8,8 @@ Waldo waldo;
 
 void setup() {
     // Wait for stability on some boards, to prevent garbage Serial
+    delay(1000);
+    
     Serial.begin(9600);
 
     // Configure waldo
