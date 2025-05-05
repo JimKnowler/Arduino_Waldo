@@ -21,7 +21,7 @@ jobs:
         with:
           compliance: "strict"
           library-manager: "submit"
-          project-type: "library"
+          project-type: "update"
           recursive: "true"
           verbose: "true"
           
