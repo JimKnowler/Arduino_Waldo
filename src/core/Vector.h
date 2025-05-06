@@ -342,7 +342,7 @@ namespace core
             return;
         }
 
-        T* oldData = Data;
+        T* OldData = Data;
         Data = nullptr;
 
         const int OldUsed = Used;
@@ -355,16 +355,15 @@ namespace core
 
         for (int i=0; i<Used; i++)
         {
-            Data[i] = oldData[i];
+            Data[i] = OldData[i];
         }
-
 
         for (int i=0; i<Used; i++)
         {
-            Data[i].~T();
+            OldData[i].~T();
         }
 
-        free(oldData);
+        free(OldData);
     }
 
     template <typename T>
