@@ -18,4 +18,6 @@ Inspired by digital puppetry built at Henson Studios.
 
 - See the example project + plugins in https://github.com/JimKnowler/UE5Waldo 
 
+## Arduino Library Manager
 
+- Logs available here: https://downloads.arduino.cc/libraries/logs/github.com/JimKnowler/Arduino_Waldo/
