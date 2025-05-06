@@ -351,7 +351,7 @@ namespace core
         Data = reinterpret_cast<T*>(malloc(sizeof(T) * DataSize));
         
         Used = OldUsed;
-        memset(Data, 0, sizeof(T) * Used);
+        memset(Data, 0, sizeof(T) * DataSize);
 
         for (int i=0; i<Used; i++)
         {
